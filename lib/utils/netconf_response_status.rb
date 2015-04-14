@@ -1,0 +1,6 @@
+class NetconfResponseStatus
+  OK = 200
+  NODE_CONNECTED = 210
+  NODE_DISCONNECTED = 410
+  NODE_CONFIGURED = 211
+end

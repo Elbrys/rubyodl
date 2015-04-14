@@ -17,11 +17,11 @@ class RestAgent
     return send_request(uri, req)
   end
 
-  def post_request(uri_endpoint, body, headers: {})
+  def post_request(uri_endpoint, post_body, headers: {})
     uri = @service_uri + URI(uri_endpoint)
     req = Net::HTTP::Post.new(uri, @headers.merge(headers))
     req.body = post_body.is_a?(String) ? post_body : post_body.to_json
-    return send_request(uri, req, validate_parse)
+    return send_request(uri, req)
   end
   
   def patch_request(uri_endpoint, patch_body)
