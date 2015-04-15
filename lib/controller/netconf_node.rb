@@ -17,4 +17,9 @@ class NetconfNode
     @password = admin_password
     @tcp_only = tcp_only
   end
+  
+  def to_hash
+    {:controller => @controller.to_hash, :name => @name, :ip_addr => @ip,
+      :port_num => @port, :admin_name => @username, :admin_password => @password}
+  end
 end

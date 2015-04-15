@@ -1,0 +1,11 @@
+controller:
+    ip_addr: '172.22.18.153'
+    username: 'admin'
+    password: 'admin'
+    
+node:
+    name: 'fake-device'
+    ip_addr: '1.2.3.4'
+    port_num: 830
+    username: 'fake-username'
+    password: 'fake-password'

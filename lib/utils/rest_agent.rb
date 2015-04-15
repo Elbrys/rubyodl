@@ -1,7 +1,12 @@
 class RestAgent
+  require 'uri'
+  require 'net/http'
+  require 'logger'
 
   attr_reader :service_uri
   attr_accessor :headers
+  
+  $LOG = Logger.new('rubybvc-requests.log')
 
   def initialize(service_uri, headers: {}, username: nil, password: nil)
     @service_uri = URI(service_uri)
@@ -49,11 +54,11 @@ class RestAgent
   def send_request(uri, request)
     request.basic_auth(@username, @password) unless @username.nil? || @username.empty?
     begin
-      #logger.info request.to_yaml
+      $LOG.info request.to_yaml
       response =  Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
         http.request(request)
       end
-      #logger.info response.to_yaml
+      $LOG.info response.to_yaml
       # catch html responses
       return response
     rescue Net::HTTPHeaderSyntaxError, Net::HTTPBadResponse => e

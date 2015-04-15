@@ -22,142 +22,226 @@ class Controller
   end
   
   def get_schemas(node_name)
-    netconf_response = nil
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "#{node_name}/yang-ext:mount/ietf-netconf-monitoring:netconf-state/schemas"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)['schemas']['schema'])
-    netconf_response
+    check_response_for_success(response) do |body|
+      if body.has_key?('schemas') && body['schemas'].has_key?('schema')
+        NetconfResponse.new(NetconfResponseStatus::OK, body['schemas']['schema'])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_schema(node_name, id: nil, version: nil)
-    netconf_response = nil
     post_uri = "/restconf/operations/opendaylight-inventory:nodes/node/"\
       "#{node_name}/yang-ext:mount/ietf-netconf-monitoring:get-schema"
     post_body = {:input => {:identifier => id, :version => version,
         :format => 'yang'}}
     response = @rest_agent.post_request(post_uri, post_body)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)['get-schema']['output']['data'])
-    netconf_response
+    check_response_for_success(response) do |body|
+      if body.has_key?('get-schema') && body['get-schema'].has_key?('output') &&
+          body['get-schema']['output'].has_key?('data')
+        NetconfResponse.new(NetconfResponseStatus::OK,
+          body['get-schema']['output']['data'])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_service_providers_info
-    netconf_response = nil
     get_uri = "/restconf/config/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:services"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)['services']['service'])
+    check_response_for_success(response) do |body|
+      if body.has_key?('services') && body['services'].has_key?('service')
+        NetconfResponse.new(NetconfResponseStatus::OK, body['services']['service'])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_service_provider_info(provider_name)
-    netconf_response = nil
     get_uri = "/restconf/config/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:services/service/#{provider_name}"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)['service'])
+    check_response_for_success(response) do |body|
+      if body.has_key?('service')
+        NetconfResponse.new(NetconfResponseStatus::OK, body['service'])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_netconf_operations(node_name)
-    netconf_response = nil
     get_uri = "/restconf/operations/opendaylight-inventory:nodes/node/"\
       "#{node_name}/yang-ext:mount"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)['operations'])
+    check_response_for_success(response) do |body|
+      if body.has_key?('operations')
+        NetconfResponse.new(NetconfResponseStatus::OK, body['operations'])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_all_modules_operational_state
-    netconf_response = nil
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:modules"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)['modules']['module'])
+    response.body.gsub!("\\\n", "")
+    check_response_for_success(response) do |body|
+      if body.has_key?('modules') && body['modules'].has_key?('module')
+        NetconfResponse.new(NetconfResponseStatus::OK, body['modules']['module'])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
-  def get_module_operations_state(module_type, module_name)
-    netconf_response = nil
+  def get_module_operational_state(module_type, module_name)
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:modules/module/"\
       "#{module_type}/#{module_name}"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)["module"])
+    check_response_for_success(response) do |body|
+      if body.has_key?('module')
+        NetconfResponse.new(NetconfResponseStatus::OK, body["module"])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_sessions_info(node_name)
-    netconf_response = nil
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "#{node_name}/yang-ext:mount/ietf-netconf-monitoring:netconf-state/"\
       "sessions"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)["sessions"])
+    check_response_for_success(response) do |body|
+      if body.has_key?('sessions')
+        NetconfResponse.new(NetconfResponseStatus::OK, body["sessions"])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_streams_info
-    netconf_response = nil
     get_uri = "restconf/streams"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)['streams'])
+    check_response_for_success(response) do |body|
+      if body.has_key?('streams')
+        NetconfResponse.new(NetconfResponseStatus::OK, body['streams'])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_all_nodes_in_config
-    netconf_response = nil
     get_uri = "/restconf/config/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK,
-      JSON.parse(response.body)['nodes']['node'])
+    check_response_for_success(response) do |body|
+      if body.has_key?('nodes') && body['nodes'].has_key?('node')
+        devices = []
+        body['nodes']['node'].each do |node|
+          devices << node['id']
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, devices)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def check_node_config_status(node_name)
-    netconf_response = nil
     get_uri = "/restconf/config/opendaylight-inventory:nodes/node/#{node_name}"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::NODE_CONFIGURED,
-      JSON.parse(response.body))
+    check_response_for_success(response) do
+      NetconfResponse.new(NetconfResponseStatus::NODE_CONFIGURED,
+        JSON.parse(response.body))
+    end
   end
   
   def check_node_conn_status(node_name)
     netconf_response = nil
-    get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/#{node_name}"
+    get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
+      "#{node_name}"
     response = @rest_agent.get_request(get_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::NODE_CONNECTED)
+    if response.code.to_i == 404
+      NetconfResponse.new(NetconfResponseStatus::NODE_NOT_FOUND)
+    else
+      check_response_for_success(response) do |body|
+        connected = false
+        if body.has_key?('node') && body['node'][0] && body['node'][0].has_key?('id')
+          if body['node'][0].has_key?('netconf-node-inventory:connected')
+            if body['node'][0]['netconf-node-inventory:connected']
+              connected = true
+            end
+          end
+        end
+        if connected
+          NetconfResponse.new(NetconfResponseStatus::NODE_CONNECTED)
+        else
+          NetconfResponse.new(NetconfResponseStatus::NODE_DISCONNECTED)
+        end
+      end
+    end
   end
   
   def get_all_nodes_conn_status
-    netconf_response = nil
     get_uri = "/restconf/operational/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
-    conn_list = []
-    JSON.parse(response.body)['nodes']['node'].each do |node|
-      conn_status = {:node => node['id'], :connected => node['netconf-node-inventory:connected']}
-      conn_list << conn_status
+    check_response_for_success(response) do |body|
+      if body.has_key?('nodes') && body['nodes'].has_key?('node')
+        conn_list = []
+        body['nodes']['node'].each do |node|
+          conn_status = {:node => node['id'],
+            :connected => node['netconf-node-inventory:connected']}
+          conn_list << conn_status
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, conn_list)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
     end
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK, conn_list)
   end
   
   def add_netconf_node(node)
-    netconf_response = nil
     post_uri = "/restconf/config/opendaylight-inventory:nodes/node/"\
-      "contoroller-config/yang-ext:mount/config:modules"
+      "controller-config/yang-ext:mount/config:modules"
     post_body = generate_node_xml(node)    
-    response = @rest_agent.post_request(post_uri, post_body)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK)
+    response = @rest_agent.post_request(post_uri, post_body,
+      headers: {'Content-Type' => "application/xml",
+        'Accept' => "application/xml"})
+    check_response_for_success(response) do
+        NetconfResponse.new(NetconfResponseStatus::OK)
+    end
   end
   
   def delete_netconf_node(node)
-    netconf_response = nil
     delete_uri = "/restconf/config/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:modules/module/"\
       "odl-sal-netconf-connector-cfg:sal-netconf-connector/#{node.name}"
     response = @rest_agent.delete_request(delete_uri)
-    netconf_response = NetconfResponse.new(NetconfResponseStatus::OK)
+    # need to do the check here because there is no response body and the code
+    # is a 200 instead of 204
+    if response.code.to_i == 200
+      NetconfResponse.new(NetconfResponseStatus::OK)
+    else
+      handle_error_response(response)
+    end
+  end
+  
+  def to_hash
+    {:ip_addr => @ip, :port_num => @port, :admin_name => @username,
+      :admin_password => @password}
   end
   
   private
@@ -173,9 +257,7 @@ class Controller
   def generate_node_xml(node)
     builder = Nokogiri::XML::Builder.new { |xml|
       xml.module(:xmlns => "#{node_namespace_prefix}:config") {
-        xml.type('xmlns:prefix' => node_namespace) {
-          "prefix:sal-netconf-connector"
-        }
+        xml.type "prefix:sal-netconf-connector", 'xmlns:prefix' => node_namespace
         xml.name node.name
         xml.address node.ip, :xmlns => node_namespace
         xml.port node.port, :xmlns => node_namespace
@@ -210,5 +292,27 @@ class Controller
       }
     }
     builder.to_xml
+  end
+  
+  def check_response_for_success(response)
+    netconf_response = nil
+    if response && ((response.body && response.code.to_i < 204) || (response.code.to_i == 204 && !response.body))
+      parsed_body = response.body ? JSON.parse(response.body) : nil
+      netconf_response = yield parsed_body
+    else
+      netconf_response = handle_error_response(response)
+    end
+    netconf_response
+  end
+  
+  def handle_error_response(response)
+    if response && response.body.nil? && response.code.to_i < 204
+      netconf_response = NetconfResponse.new(NetconfResponseStatus::CTRL_INTERNAL_ERROR)
+    elsif response && response.code.to_i > 204
+      netconf_response = NetconfResponse.new(NetconfResponseStatus::HTTP_ERROR,
+         response)
+    elsif !response
+      netconf_response = NetconfResponse.new(NetconfResponseStatus::CONN_ERROR)
+    end
   end
 end
