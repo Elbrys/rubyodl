@@ -2,7 +2,8 @@ require 'spec_helper'
 require 'controller/controller'
 
 RSpec.describe Controller do
-  let(:controller) { Controller.new(ip_addr: '1.2.3.4', port_number: '1234', admin_name: 'username', admin_password: 'password')}
+  let(:controller) { Controller.new(ip_addr: '1.2.3.4', port_number: '1234',
+      admin_name: 'username', admin_password: 'password')}
   
   context 'successful response' do
     it 'gets a list of schemas for a particular node' do
@@ -160,6 +161,19 @@ RSpec.describe Controller do
       response = controller.get_all_nodes_in_config
       expect(response.status).to eq(NetconfResponseStatus::OK)
       expect(response.body).to eq([JSON.parse(nodes)['nodes']['node'][0]['id']])
+    end
+    
+    it 'shows the configured openflow nodes' do
+      nodes = {:nodes => {:node => [{:id => "openflow:1"},
+            {:id => "node-id"}]}}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/config/"\
+        "opendaylight-inventory:nodes").to_return(:body => nodes)
+    
+      response = controller.get_openflow_nodes_operational_list
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body).to eq(["openflow:1"])
     end
 
     it 'adds a node' do

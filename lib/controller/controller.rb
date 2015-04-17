@@ -10,6 +10,7 @@ class Controller
   attr_reader :username
   attr_reader :password
   attr_reader :timeout
+  attr_reader :rest_agent
   
   def initialize(ip_addr: nil, port_number: 8181, admin_name: nil, admin_password: nil, timeout_in_s: 5)
     @ip = ip_addr
@@ -160,6 +161,15 @@ class Controller
     end
   end
   
+  def get_openflow_nodes_operational_list
+    response = get_all_nodes_in_config
+    if response.status == NetconfResponseStatus::OK
+      filtered_list = response.body.delete_if {|node_name| !node_name.start_with?("openflow")}
+      response.body = filtered_list
+    end
+    response
+  end
+  
   def check_node_config_status(node_name)
     get_uri = "/restconf/config/opendaylight-inventory:nodes/node/#{node_name}"
     response = @rest_agent.get_request(get_uri)
@@ -237,6 +247,14 @@ class Controller
     else
       handle_error_response(response)
     end
+  end
+  
+  def get_node_operational_uri(node)
+    "/restconf/operational/opendaylight-inventory:nodes/node/#{node.name}"
+  end
+  
+  def get_node_config_uri(node)
+    "/restconf/config/opendaylight-inventory:nodes/node/#{node.name}"
   end
   
   def to_hash

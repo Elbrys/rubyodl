@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'rubybvc'
-  s.version     = '0.0.3'
+  s.version     = '0.1.0'
   s.date        = '2015-04-10'
   s.summary     = "Ruby BVC"
   s.description = "Ruby support library for Brocade Vyatta Controller (BVC) RESTCONF API"
