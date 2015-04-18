@@ -4,15 +4,14 @@ class FlowEntry
   require 'openflowdev/match'
   
   attr_reader :table_id, :id, :priority, :idle_timeout, :hard_timeout, :strict,
-    :install_hw, :barrier, :cookie, :cookie_mask
+    :install_hw, :barrier, :cookie, :cookie_mask, :name, :instructions, :match
   
-  attr_reader :instructions, :match
-  
-  def initialize(flow_table_id: 0, flow_id: nil, flow_priority: nil,
+  def initialize(flow_table_id: 0, flow_id: nil, flow_priority: nil, name: nil,
       idle_timeout: 0, hard_timeout: 0, strict: false, install_hw: false,
       barrier: false, cookie: nil, cookie_mask: nil)
     @table_id = flow_table_id
     @id = flow_id
+    @name = name
     @priority = flow_priority
     @idle_timeout = idle_timeout
     @hard_timeout = hard_timeout
@@ -44,6 +43,6 @@ class FlowEntry
       :instructions => {:instruction => instructions_hash,
       :match => @match.to_hash, :priority => @priority,
       :strict => @strict, :table_id => @table_id, :cookie => @cookie,
-      :cookie_mask => @cookie_mask}}}
+      :cookie_mask => @cookie_mask, :name => @name}}}
   end
 end

@@ -1,0 +1,8 @@
+controller:
+    ip_addr: "172.22.18.153"
+    port_num: 8181
+    username: 'admin'
+    password: 'admin'
+    
+node:
+    name: "openflow:1"

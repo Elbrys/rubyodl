@@ -7,6 +7,8 @@ require 'openflowdev/instruction'
 require 'openflowdev/match'
 require 'openflowdev/of_switch'
 require 'openflowdev/output_action'
+require 'openflowdev/push_vlan_header_action'
+require 'openflowdev/set_field_action'
 
 require 'utils/hash_with_compact'
 require 'utils/netconf_response'
