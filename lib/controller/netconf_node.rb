@@ -1,10 +1,5 @@
 class NetconfNode
-  attr_reader :name
-  attr_reader :ip
-  attr_reader :port
-  attr_reader :username
-  attr_reader :password
-  attr_reader :tcp_only
+  attr_reader :name, :ip, :port, :username, :password, :tcp_only
   
   def initialize(controller: nil, node_name: nil, ip_addr: nil,
       port_number: nil, admin_name: nil, admin_password: nil,

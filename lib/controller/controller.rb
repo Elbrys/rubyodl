@@ -13,7 +13,8 @@ class Controller
   attr_reader :timeout
   attr_reader :rest_agent
   
-  def initialize(ip_addr: nil, port_number: 8181, admin_name: nil, admin_password: nil, timeout_in_s: 5)
+  def initialize(ip_addr: nil, port_number: 8181, admin_name: nil,
+      admin_password: nil, timeout_in_s: 5)
     @ip = ip_addr
     @port = port_number
     @username = admin_name
@@ -256,6 +257,10 @@ class Controller
   
   def get_node_config_uri(node)
     "/restconf/config/opendaylight-inventory:nodes/node/#{node.name}"
+  end
+  
+  def get_ext_mount_config_uri(node)
+    "/restconf/config/opendaylight-inventory:nodes/node/#{node.name}/yang-ext:mount"
   end
   
   def to_hash

@@ -1,6 +1,12 @@
 require 'controller/controller'
 require 'controller/netconf_node'
 
+require 'netconfdev/vrouter/dataplane_firewall.rb'
+require 'netconfdev/vrouter/firewall.rb'
+require 'netconfdev/vrouter/rule.rb'
+require 'netconfdev/vrouter/rules.rb'
+require 'netconfdev/vrouter/vrouter5600.rb'
+
 require 'openflowdev/drop_action'
 require 'openflowdev/flow_entry'
 require 'openflowdev/instruction'
