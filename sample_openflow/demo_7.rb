@@ -41,7 +41,7 @@ table_id = 0
 flow_entry = FlowEntry.new(flow_priority: 1005, flow_id: flow_id, flow_table_id: table_id)
 # Instruction: 'Apply-action'
 #      Action: 'Drop'
-instruction = Instruction.net(instruction_order: 0)
+instruction = Instruction.new(instruction_order: 0)
 action = OutputAction.new(order: 0, port: "CONTROLLER", max_length: 60)
 instruction.add_apply_action(action)
 flow_entry.add_instruction(instruction)
@@ -52,8 +52,8 @@ flow_entry.add_instruction(instruction)
 #               IPv4 Source Address
 #               IPv4 Destination Address
 #               Input port
-match = Match.new(eth_type: eth_type, eth_source: eth_src,
-  eth_destination: eth_dst, ipv4_destination: ipv4_dst,
+match = Match.new(eth_type: eth_type, ethernet_source: eth_src,
+  ethernet_destination: eth_dst, ipv4_destination: ipv4_dst,
   ipv4_source: ipv4_src, in_port: input_port)
 flow_entry.add_match(match)
 

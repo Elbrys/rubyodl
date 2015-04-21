@@ -168,7 +168,7 @@ RSpec.describe Controller do
             {:id => "node-id"}]}}.to_json
       WebMock.stub_request(:get,
         "http://#{controller.username}:#{controller.password}@"\
-        "#{controller.ip}:#{controller.port}/restconf/config/"\
+        "#{controller.ip}:#{controller.port}/restconf/operational/"\
         "opendaylight-inventory:nodes").to_return(:body => nodes)
     
       response = controller.get_openflow_nodes_operational_list

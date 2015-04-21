@@ -34,7 +34,7 @@ table_id = 0
 flow_entry = FlowEntry.new(flow_priority: 1004, flow_id: flow_id, flow_table_id: table_id)
 # Instruction: 'Apply-action'
 #      Action: 'Drop'
-instruction = Instruction.net(instruction_order: 0)
+instruction = Instruction.new(instruction_order: 0)
 action = DropAction.new(order: 0)
 instruction.add_apply_action(action)
 flow_entry.add_instruction(instruction)
@@ -42,8 +42,8 @@ flow_entry.add_instruction(instruction)
 # Match fields: Ethernet type
 #               Ethernet Source Address
 #               Ethernet Destination Address
-match = Match.new(eth_type: eth_type, eth_source: eth_src,
-  eth_destination: eth_dst)
+match = Match.new(eth_type: eth_type, ethernet_source: eth_src,
+  ethernet_destination: eth_dst)
 flow_entry.add_match(match)
 
 puts "\nFlow to send: #{JSON.pretty_generate flow_entry.to_hash}"

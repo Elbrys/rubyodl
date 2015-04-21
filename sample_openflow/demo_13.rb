@@ -49,8 +49,8 @@ flow_entry.add_instruction(instruction)
 #               Ethernet Destination Address
 #               VLAN ID
 #               VLAN PCP
-match = Match.new(eth_type: eth_type, eth_source: eth_src,
-  eth_destination: eth_dst, vlan_id: vlan_id, vlan_pcp: vlan_pcp)
+match = Match.new(eth_type: eth_type, ethernet_source: eth_src,
+  ethernet_destination: eth_dst, vlan_id: vlan_id, vlan_pcp: vlan_pcp)
 flow_entry.add_match(match)
 
 puts "\nFlow to send: #{JSON.pretty_generate flow_entry.to_hash}"

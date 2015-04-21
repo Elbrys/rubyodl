@@ -53,7 +53,8 @@ class Match
       'arp-target-hardware-address' => {:address => @arp_tgt_hw_addr},
       'arp-target-transport-address' => @arp_tgt_ipv4,
       'vlan-match' => {'vlan-id' => {'vlan-id' => @vlan_id,
-          'vlan-id-present' => !@vlan_id.nil?}, 'vlan-pcp' => 3}}
-    hash = hash.compact
+          'vlan-id-present' => !@vlan_id.nil?}, 'vlan-pcp' => @vlan_pcp}}
+    hash.delete("vlan-match") if !@vlan_id
+    hash
   end
 end

@@ -37,12 +37,14 @@ class FlowEntry
       instructions_hash << instruction.to_hash
     end
     
-    {'flow-node-inventory:flow' => {:barrier => @barrier,
+    hash = {'flow-node-inventory:flow' => {:barrier => @barrier,
       'hard-timeout' => @hard_timeout, :id => @id,
-      'idle-timeout' => @idle_timeout, 'install-hw' => @install_hw,
-      :instructions => {:instruction => instructions_hash,
+      'idle-timeout' => @idle_timeout, 'installHw' => @install_hw,
+      :instructions => {:instruction => instructions_hash},
       :match => @match.to_hash, :priority => @priority,
       :strict => @strict, :table_id => @table_id, :cookie => @cookie,
-      :cookie_mask => @cookie_mask, :name => @name}}}
+      :cookie_mask => @cookie_mask, 'flow-name' => @name}}
+    hash = hash.compact
+    hash
   end
 end

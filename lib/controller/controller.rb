@@ -164,12 +164,19 @@ class Controller
   end
   
   def get_openflow_nodes_operational_list
-    response = get_all_nodes_in_config
-    if response.status == NetconfResponseStatus::OK
-      filtered_list = response.body.delete_if {|node_name| !node_name.start_with?("openflow")}
-      response.body = filtered_list
+    get_uri = "/restconf/operational/opendaylight-inventory:nodes"
+    response = @rest_agent.get_request(get_uri)
+    check_response_for_success(response) do |body|
+      if body.has_key?('nodes') && body['nodes'].has_key?('node')
+        filtered_list = []
+        body['nodes']['node'].each do |node|
+          filtered_list << node['id'] if node['id'].start_with?('openflow')
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, filtered_list)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
     end
-    response
   end
   
   def check_node_config_status(node_name)

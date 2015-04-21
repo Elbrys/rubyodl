@@ -30,19 +30,19 @@ sleep(delay)
 
 flow_id = 12
 table_id = 0
-flow_entry = FlowEntry.new(table_id: table_id, flow_id: flow_id,
+flow_entry = FlowEntry.new(flow_table_id: table_id, flow_id: flow_id,
   flow_priority: 1003)
 # Instruction: 'Appy-action'
 #      Action: 'Drop'
 instruction = Instruction.new(instruction_order: 0)
 action = DropAction.new(order: 0)
 instruction.add_apply_action(action)
-flow_entry.add_instruction(flow_entry)
+flow_entry.add_instruction(instruction)
 
 # Match fields: Ethernet Type,
 #               IPv4 Source Address
 match = Match.new(eth_type: eth_type, ipv4_source: ipv4_src)
-flow_entry.add(match)
+flow_entry.add_match(match)
 
 puts"\nFlow to send: #{JSON.pretty_generate flow_entry.to_hash}"
 
@@ -57,7 +57,7 @@ end
 
 puts "\n Get configured flow from the Controller"
 response = of_switch.get_configured_flow(table_id: table_id, flow_id: flow_id)
-if response.status == NetconfResponseStatus
+if response.status == NetconfResponseStatus::OK
   puts "Flow successfully read from the controller"
   puts "Flow info: #{JSON.pretty_generate response.body}"
 else

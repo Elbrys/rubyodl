@@ -16,6 +16,6 @@ class Instruction
     @actions.each do |action|
       actions_hash << action.to_hash
     end
-    {:order => @order, :apply_actions => {:action => actions_hash}}
+    {:order => @order, 'apply-actions' => {:action => actions_hash}}
   end
 end

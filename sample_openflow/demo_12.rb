@@ -60,8 +60,8 @@ flow_entry.add_instruction(instruction)
 #               ARP Target IPv4 address
 #               ARP Source Hardware Address
 #               ARP Target Hardware Address
-match = Match.new(eth_type: eth_type, eth_source: eth_src,
-  eth_destination: eth_dst, arp_op_code: arp_opcode,
+match = Match.new(eth_type: eth_type, ethernet_source: eth_src,
+  ethernet_destination: eth_dst, arp_op_code: arp_opcode,
   arp_source_ipv4: arp_src_ipv4_addr, arp_target_ipv4: arp_tgt_ipv4_addr,
   arp_source_hardware_address: arp_src_hw_addr,
   arp_target_hardware_address: arp_tgt_hw_addr)

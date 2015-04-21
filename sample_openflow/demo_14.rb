@@ -52,14 +52,14 @@ set_action = SetFieldAction.new(order: 1, vlan_id: push_vlan_id)
 instruction.add_apply_action(set_action)
 out_action = OutputAction.new(order: 2, port: output_port)
 instruction.add_apply_action(out_action)
-flow_entry.add_instruction(flow_entry)
+flow_entry.add_instruction(instruction)
 
 # Match fields: Ethernet Type,
 #               Ethernet Source Address
 #               Ethernet Destination Address
 #               Input Port
-match = Match.new(eth_type: eth_type, eth_source: eth_src,
-  eth_destination: eth_dst, in_port: input_port)
+match = Match.new(eth_type: eth_type, ethernet_source: eth_src,
+  ethernet_destination: eth_dst, in_port: input_port)
 flow_entry.add_match(match)
 
 puts"\nFlow to send: #{JSON.pretty_generate flow_entry.to_hash}"
@@ -75,7 +75,7 @@ end
 
 puts "\n Get configured flow from the Controller"
 response = of_switch.get_configured_flow(table_id: table_id, flow_id: flow_id)
-if response.status == NetconfResponseStatus
+if response.status == NetconfResponseStatus::OK
   puts "Flow successfully read from the controller"
   puts "Flow info: #{JSON.pretty_generate response.body}"
 else

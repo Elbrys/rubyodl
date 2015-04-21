@@ -50,7 +50,7 @@ flow_entry = FlowEntry.new(flow_priority: 1007, flow_id: flow_id,
   flow_table_id: table_id, cookie: 101, cookie_mask: 255)
 # Instruction: 'Apply-action'
 #      Action: 'Drop'
-instruction = Instruction.net(instruction_order: 0)
+instruction = Instruction.new(instruction_order: 0)
 action = OutputAction.new(order: 0, port: "NORMAL")
 instruction.add_apply_action(action)
 flow_entry.add_instruction(instruction)
@@ -66,8 +66,8 @@ flow_entry.add_instruction(instruction)
 #               TCP Source Port Number
 #               TCP Destination Port Number
 #               Input port
-match = Match.new(eth_type: eth_type, eth_source: eth_src,
-  eth_destination: eth_dst, ipv4_destination: ipv4_dst,
+match = Match.new(eth_type: eth_type, ethernet_source: eth_src,
+  ethernet_destination: eth_dst, ipv4_destination: ipv4_dst,
   ipv4_source: ipv4_src, ip_protocol_num: ip_proto, ip_dscp: ip_dscp,
   ip_ecn: ip_ecn, tcp_source_port: tcp_src_port,
   tcp_destination_port: tcp_dst_port, in_port: input_port)

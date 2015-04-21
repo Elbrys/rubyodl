@@ -18,6 +18,7 @@ puts "Controller: #{JSON.pretty_generate controller.to_hash}"
 
 name = "openflow:1"
 puts "\nGet information for ports on OpenFlowNode: #{name}"
+sleep(delay)
 of_switch = OFSwitch.new(controller: controller, name: name)
 response = of_switch.get_ports_list
 if response.status == NetconfResponseStatus::OK
@@ -26,6 +27,9 @@ if response.status == NetconfResponseStatus::OK
     response = of_switch.get_port_detail_info(port)
     if response.status == NetconfResponseStatus::OK
       puts "\nPort #{port} info: #{JSON.pretty_generate response.body}"
+    else
+      puts "\nDemo terminated #{response.message}"
+      exit
     end
   end
 else

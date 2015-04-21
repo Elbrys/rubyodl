@@ -21,14 +21,14 @@ sleep(delay)
 response = controller.get_openflow_nodes_operational_list
 if response.status == NetconfResponseStatus::OK
   puts 'OpenFlow node names (composed as "openflow:datapathid"):'
-  puts "#{JSON.pretty_genearte response.body}"
+  puts "#{JSON.pretty_generate response.body}"
   node_names = response.body
 else
   puts "\nDemo terminated: #{response.message}"
   exit
 end
 
-puts "\nGet generic information about OpenFlow ndoes"
+puts "\nGet generic information about OpenFlow nodes"
 sleep(delay)
 node_names.each do |name|
 of_switch = OFSwitch.new(controller: controller, name: name)

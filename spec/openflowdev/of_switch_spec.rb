@@ -80,17 +80,17 @@ RSpec.describe OFSwitch do
 
     it 'gets brief info on a particular port' do
       port_number = "1"
-      port_details = [{:id => 'port-id',
-          :port_detail_key => 'port-detail-value'}].to_json
+      port_details = {'node-connector' => [{:id => 'port-id',
+          :port_detail_key => 'port-detail-value'}]}.to_json
       WebMock.stub_request(:get,
         "http://#{controller.username}:#{controller.password}@"\
         "#{controller.ip}:#{controller.port}/restconf/operational/"\
-        "opendaylight-inventory:nodes/node/#{switch.name}/node-controller/"\
+        "opendaylight-inventory:nodes/node/#{switch.name}/node-connector/"\
         "#{switch.name}:#{port_number}").to_return(:body => port_details)
 
       response = switch.get_port_detail_info(port_number)
       expect(response.status).to eq(NetconfResponseStatus::OK)
-      expect(response.body).to eq(JSON.parse(port_details)[0])
+      expect(response.body).to eq(JSON.parse(port_details)['node-connector'][0])
     end
 
     it 'adds a flow' do
@@ -132,25 +132,91 @@ RSpec.describe OFSwitch do
       expect(response.body).to eq(JSON.parse(configured_flow))
     end
 
-  #  it 'gets operational flows' do
-  #    table_id = 0
-  #    flows = {:id => table_id, 'flow-node-inventory:table' =>
-  #        {:flow_stat_1 => "flow value 1"}}.to_json
-  #    WebMock.stub_request(:get,
-  #      "http://#{controller.username}:#{controller.password}@"\
-  #      "#{controller.ip}:#{controller.port}/restconf/operational/"\
-  #      "opendaylight-inventory:nodes/node/#{switch.name}/"\
-  #      "flow-node-inventory:table/#{table_id}").to_return(:body => flows)
-  #    
-  #    response = switch.get_operational_flows(table_id)
-  #    expect(response.status).to eq(NetconfResponseStatus::OK)
-  #    expect(response.body).to eq(JSON.parse(flows)['flow-node-inventory:table'])
-  #  end
-  #  
-  #  it 'returns the flows in OVS syntax' do
-  #    table_id = 0
-  #    
-  #  end
+    it 'gets operational flows' do
+      table_id = 0
+      flows = {'flow-node-inventory:table' => [{:id => table_id, 
+          :flow => [{:flow_stat_1 => "flow value 1"}]}]}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/operational/"\
+        "opendaylight-inventory:nodes/node/#{switch.name}/"\
+        "flow-node-inventory:table/#{table_id}").to_return(:body => flows)
+      
+      response = switch.get_operational_flows(table_id: table_id)
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body).to eq(JSON.parse(flows)['flow-node-inventory:table'][0]['flow'])
+    end
+    
+    it 'gets configured flows' do
+      table_id = 0
+      flows = {'flow-node-inventory:table' => [{:id => table_id, 
+          :flow => [{:flow_stat_1 => "flow value 1"}]}]}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/config/"\
+        "opendaylight-inventory:nodes/node/#{switch.name}/"\
+        "flow-node-inventory:table/#{table_id}").to_return(:body => flows)
+      
+      response = switch.get_configured_flows(table_id: table_id)
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body).to eq(JSON.parse(flows)['flow-node-inventory:table'][0]['flow'])
+    end
+    
+    it 'returns the operational flows in OVS syntax' do
+      table_id = 0
+      flows = {'flow-node-inventory:table' => [{:id => table_id, 
+          :flow => [{'opendaylight-flow-statistics:flow-statistics' =>
+            {'byte-count' => 11, :duration => {:nanosecond => 128000000, 
+              :second => 22}, 'packet-count' => 33}, :table_id => table_id,
+          :priority => 1, :cookie => 1234, :match => {'in-port' => "#{switch.name}:5"},
+          :instructions => {:instruction => [{'apply-actions' => {:action =>
+              [{:order => 0, 'output-action' => {'output-node-connector' =>
+                "controller"}}]}}]}}]}]}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/operational/"\
+        "opendaylight-inventory:nodes/node/#{switch.name}/"\
+        "flow-node-inventory:table/#{table_id}").to_return(:body => flows)
+    
+      response = switch.get_operational_flows_ovs_syntax(table_id: table_id)
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body[0]).to have_key('cookie')
+      expect(response.body[0]).to have_key('duration')
+      expect(response.body[0]).to have_key('table')
+      expect(response.body[0]).to have_key('n_packets')
+      expect(response.body[0]).to have_key('n_bytes')
+      expect(response.body[0]).to have_key('priority')
+      expect(response.body[0]).to have_key('in_port')
+      expect(response.body[0]).to have_key('actions')
+    end
+    
+    it 'returns the configured flows in OVS syntax' do
+      table_id = 0
+      flows = {'flow-node-inventory:table' => [{:id => table_id, 
+          :flow => [{'opendaylight-flow-statistics:flow-statistics' =>
+            {'byte-count' => 11, :duration => {:nanosecond => 128000000, 
+              :second => 22}, 'packet-count' => 33}, :table_id => table_id,
+          :priority => 1, :cookie => 1234, :match => {'in-port' => "#{switch.name}:5"},
+          :instructions => {:instruction => [{'apply-actions' => {:action =>
+              [{:order => 0, 'output-action' => {'output-node-connector' =>
+                "controller"}}]}}]}}]}]}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/config/"\
+        "opendaylight-inventory:nodes/node/#{switch.name}/"\
+        "flow-node-inventory:table/#{table_id}").to_return(:body => flows)
+    
+      response = switch.get_configured_flows_ovs_syntax(table_id: table_id)
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body[0]).to have_key('cookie')
+      expect(response.body[0]).to have_key('duration')
+      expect(response.body[0]).to have_key('table')
+      expect(response.body[0]).to have_key('n_packets')
+      expect(response.body[0]).to have_key('n_bytes')
+      expect(response.body[0]).to have_key('priority')
+      expect(response.body[0]).to have_key('in_port')
+      expect(response.body[0]).to have_key('actions')
+    end
   end
   
   context 'erroneous requests' do
