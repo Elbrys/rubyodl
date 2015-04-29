@@ -163,6 +163,18 @@ RSpec.describe Controller do
       expect(response.body).to eq([JSON.parse(nodes)['nodes']['node'][0]['id']])
     end
     
+    it 'gets a list of all operational nodes' do
+      nodes = {:nodes => {:node => [{:id => 'node-id'}]}}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/operational/"\
+        "opendaylight-inventory:nodes").to_return(:body => nodes)
+    
+      response = controller.get_nodes_operational_list
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body).to eq([JSON.parse(nodes)['nodes']['node'][0]['id']])
+    end
+    
     it 'shows the configured openflow nodes' do
       nodes = {:nodes => {:node => [{:id => "openflow:1"},
             {:id => "node-id"}]}}.to_json
@@ -217,6 +229,19 @@ RSpec.describe Controller do
 
       response = controller.check_node_config_status(node_id)
       expect(response.status).to eq(NetconfResponseStatus::NODE_CONFIGURED)
+    end
+    
+    it 'returns information on a node' do
+      node_id = "node-id"
+      info = {:node => {:id => node_id}}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/operational/"\
+        "opendaylight-inventory:nodes/node/#{node_id}").to_return(:body => info)
+    
+      response = controller.get_node_info(node_id)
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body).to eq(JSON.parse(info)['node'])
     end
 
     it 'shows connections status for all nodes' do

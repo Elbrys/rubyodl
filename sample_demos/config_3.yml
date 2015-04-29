@@ -1,0 +1,11 @@
+controller:
+    ip_addr: '172.22.18.153'
+    username: 'admin'
+    password: 'admin'
+    
+node:
+    name: 'dut-device'
+    ip_addr: '172.22.17.107'
+    port_num: 830
+    username: 'vyatta'
+    password: 'vyatta'

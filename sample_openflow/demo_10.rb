@@ -26,14 +26,14 @@ of_switch = OFSwitch.new(controller: controller, name: name)
 eth_type = 2048
 eth_src = "00:00:00:11:23:ae"
 eth_dst = "20:14:29:01:19:61"
-ipv4_src = "19.1.2.3/10"
+ipv4_src = "192.1.2.3/10"
 ipv4_dst = "172.168.5.6/18"
 ip_proto = 17
 ip_dscp = 8
 ip_ecn = 3
 udp_src_port = 25364
 udp_dst_port = 8080
-input_port = 3
+input_port = 13
 
 puts "\nMatch: Ethernet Type 0x#{eth_type.to_s(16)}, Ethernet source #{eth_src}"\
   ", Ethernet destination #{eth_dst}, IPv4 source #{ipv4_src}, "\

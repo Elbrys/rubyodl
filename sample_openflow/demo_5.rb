@@ -17,7 +17,7 @@ controller = Controller.new(ip_addr: config['controller']['ip_addr'],
   admin_password: config['controller']['password'])
 puts "Controller: #{JSON.pretty_generate controller.to_hash}"
 
-name = "openflow:1"
+name = config['node']['name']
 of_switch = OFSwitch.new(controller: controller, name: name)
 # Ethernet type MUST be 2048 (0x800) -> IPv4 protocol
 eth_type = 2048

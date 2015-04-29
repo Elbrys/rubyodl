@@ -168,10 +168,18 @@ RSpec.describe OFSwitch do
           :flow => [{'opendaylight-flow-statistics:flow-statistics' =>
             {'byte-count' => 11, :duration => {:nanosecond => 128000000, 
               :second => 22}, 'packet-count' => 33}, :table_id => table_id,
-          :priority => 1, :cookie => 1234, :match => {'in-port' => "#{switch.name}:5"},
+          :priority => 1, :cookie => 1234, :match =>
+            {'in-port' => "#{switch.name}:5", 'vlan-match' => {'vlan-id' =>
+                {'vlan-id' => 1}, 'vlan-pcp' => 2}, 'ethernet-match' =>
+              {'ethernet-type' => {:type => 10000}, 'ethernet-source' =>
+                {:address => '1.2.3.4'}, 'ethernet-destination' =>
+                {:address => '4.3.2.1'}}, 'ip-match' => {'ip-protocol' => 321},
+            'tcp-source-port' => '1234', 'ipv4-source' => '2.3.4.5',
+            'ipv4-destination' => '5.4.3.2'},
           :instructions => {:instruction => [{'apply-actions' => {:action =>
               [{:order => 0, 'output-action' => {'output-node-connector' =>
-                "controller"}}]}}]}}]}]}.to_json
+                "controller"}}]}}]}, 'idle-timeout' => 20,
+          'hard-timeout' => 600}]}]}.to_json
       WebMock.stub_request(:get,
         "http://#{controller.username}:#{controller.password}@"\
         "#{controller.ip}:#{controller.port}/restconf/operational/"\
@@ -188,6 +196,17 @@ RSpec.describe OFSwitch do
       expect(response.body[0]).to have_key('priority')
       expect(response.body[0]).to have_key('in_port')
       expect(response.body[0]).to have_key('actions')
+      expect(response.body[0]).to have_key('idle_timeout')
+      expect(response.body[0]).to have_key('hard_timeout')
+      expect(response.body[0]).to have_key('dl_vlan')
+      expect(response.body[0]).to have_key('dl_vlan_pcp')
+      expect(response.body[0]).to have_key('dl_type')
+      expect(response.body[0]).to have_key('dl_src')
+      expect(response.body[0]).to have_key('dl_dst')
+      expect(response.body[0]).to have_key('nw_proto')
+      expect(response.body[0]).to have_key('tp_src')
+      expect(response.body[0]).to have_key('nw_src')
+      expect(response.body[0]).to have_key('nw_dst')
     end
     
     it 'returns the configured flows in OVS syntax' do

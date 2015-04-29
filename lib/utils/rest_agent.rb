@@ -29,12 +29,12 @@ class RestAgent
     return send_request(uri, req)
   end
   
-  def patch_request(uri_endpoint, patch_body, headers: {})
-    uri = @service_uri + URI(uri_endpoint)
-    req = Net::HTTP::Patch.new(uri, @headers.merge(headers))
-    req.body = patch_body.to_json
-    return send_request(uri, req)
-  end
+#  def patch_request(uri_endpoint, patch_body, headers: {})
+#    uri = @service_uri + URI(uri_endpoint)
+#    req = Net::HTTP::Patch.new(uri, @headers.merge(headers))
+#    req.body = patch_body.to_json
+#    return send_request(uri, req)
+#  end
 
   def put_request(uri_endpoint, put_body, headers: {})
     uri = @service_uri + URI(uri_endpoint)

@@ -1,12 +1,8 @@
 class Firewall
   attr_reader :rules
   
-  def initialize
-    @rules = nil
-  end
-  
-  def add_rules(rules_array)
-    @rules = rules_array
+  def initialize(rules: nil)
+    @rules = rules
   end
   
   def to_hash

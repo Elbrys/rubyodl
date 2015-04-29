@@ -72,11 +72,10 @@ RSpec.describe VRouter5600 do
   end
   
   it 'creates a firewall instance' do
-    firewall = Firewall.new
     rules = Rules.new(name: 'firewall-group')
     rule = Rule.new(rule_number: 1, action: 'accept', source_address: '1.2.3.4')
     rules.add_rule(rule)
-    firewall.add_rules(rules)
+    firewall = Firewall.new(rules: rule)
     firewall_json = firewall.to_hash.to_json
     
     WebMock.stub_request(:post,
@@ -102,17 +101,16 @@ RSpec.describe VRouter5600 do
       "vyatta-security:security/vyatta-security-firewall:firewall/name/"\
       "#{firewall_name}").to_return(:body => firewall)
   
-    response = vrouter.get_firewall_instance(firewall_name)
+    response = vrouter.get_firewall_instance_cfg(firewall_name)
     expect(response.status).to eq(NetconfResponseStatus::OK)
     expect(response.body).to eq(JSON.parse(firewall))
   end
   
   it 'removes a particular firewall instance' do
-    firewall = Firewall.new
     rules = Rules.new(name: 'firewall-group')
     rule = Rule.new(rule_number: 1, action: 'accept', source_address: '1.2.3.4')
     rules.add_rule(rule)
-    firewall.add_rules(rules)
+    firewall = Firewall.new(rules: rules)
     
     WebMock.stub_request(:delete,
       "http://#{controller.username}:#{controller.password}@"\
@@ -221,17 +219,55 @@ RSpec.describe VRouter5600 do
     expect(response.body).to eq(JSON.parse(loopback))
   end
   
+  it 'gets a list of all interfaces' do
+    interfaces = {:interfaces => {'vyatta-interfaces-loopback:loopback' =>
+          [{:tagnode => "interface-name"}], 'vyatta-interfaces-dataplane' =>
+          [{:tagnode => "dataplane-interface"}]}}.to_json
+    
+     WebMock.stub_request(:get,
+      "http://#{controller.username}:#{controller.password}@"\
+      "#{controller.ip}:#{controller.port}/restconf/config/"\
+      "opendaylight-inventory:nodes/node/#{vrouter.name}/yang-ext:mount/"\
+      "vyatta-interfaces:interfaces").to_return(:body => interfaces)
+  
+    response = vrouter.get_interfaces_list
+    expect(response.status).to eq(NetconfResponseStatus::OK)
+    expect(response.body).to include("interface-name")
+    expect(response.body).to include("dataplane-interface")
+  end
+  
+  it 'gets configuration of all interfaces' do
+    interfaces = {:interfaces => {'vyatta-interfaces-loopback:loopback' =>
+          [{:tagnode => "interface-name"}], 'vyatta-interfaces-dataplane' =>
+          [{:tagnode => "dataplane-interface"}]}}.to_json
+    
+     WebMock.stub_request(:get,
+      "http://#{controller.username}:#{controller.password}@"\
+      "#{controller.ip}:#{controller.port}/restconf/config/"\
+      "opendaylight-inventory:nodes/node/#{vrouter.name}/yang-ext:mount/"\
+      "vyatta-interfaces:interfaces").to_return(:body => interfaces)
+  
+    response = vrouter.get_interfaces_cfg
+    expect(response.status).to eq(NetconfResponseStatus::OK)
+    expect(response.body).to eq(JSON.parse(interfaces))
+  end
+  
   it 'sets a firewall for a dataplane interface on inbound and outbound traffic' do
     interface_name = "dataplane-interface"
+    in_firewall = 'firewall-in'
+    out_firewall = 'firewall-out'
     WebMock.stub_request(:put,
       "http://#{controller.username}:#{controller.password}@"\
       "#{controller.ip}:#{controller.port}/restconf/config/"\
       "opendaylight-inventory:nodes/node/#{vrouter.name}/yang-ext:mount/"\
       "vyatta-interfaces:interfaces/vyatta-interfaces-dataplane:dataplane/"\
-      "#{interface_name}")
+      "#{interface_name}").with(:body =>
+      {'vyatta-interfaces-dataplane:dataplane' => {:tagnode => interface_name,
+        'vyatta-security-firewall:firewall' => {:in => [in_firewall],
+          :out => [out_firewall]}}}.to_json)
   
     response = vrouter.set_dataplane_interface_firewall(interface_name,
-      inbound_firewall_name: 'firewall-in', outbound_firewall_name: 'firewall-out')
+      inbound_firewall_name: in_firewall, outbound_firewall_name: out_firewall)
     expect(response.status).to eq(NetconfResponseStatus::OK)
   end
   

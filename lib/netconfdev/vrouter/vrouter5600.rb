@@ -15,29 +15,37 @@ class VRouter5600 < NetconfNode
   def get_cfg
     get_uri = @controller.get_ext_mount_config_uri(self)
     response = @controller.rest_agent.get_request(get_uri)
-    NetconfResponse.new(NetconfResponseStatus::OK, JSON.parse(response.body))
+    check_response_for_success(response) do |body|
+      NetconfResponse.new(NetconfResponseStatus::OK, body)
+    end
   end
   
   def get_firewalls_cfg
     get_uri = "#{@controller.get_ext_mount_config_uri(self)}/"\
       "vyatta-security:security/vyatta-security-firewall:firewall"
     response = @controller.rest_agent.get_request(get_uri)
-    NetconfResponse.new(NetconfResponseStatus::OK, JSON.parse(response.body))
+    check_response_for_success(response) do |body|
+      NetconfResponse.new(NetconfResponseStatus::OK, body)
+    end
   end
   
-  def get_firewall_instance(firewall_name)
+  def get_firewall_instance_cfg(firewall_name)
     get_uri = "#{@controller.get_ext_mount_config_uri(self)}/"\
       "vyatta-security:security/vyatta-security-firewall:firewall/name/"\
       "#{firewall_name}"
     response = @controller.rest_agent.get_request(get_uri)
-    NetconfResponse.new(NetconfResponseStatus::OK, JSON.parse(response.body))
+    check_response_for_success(response) do |body|
+      NetconfResponse.new(NetconfResponseStatus::OK, body)
+    end
   end
   
   def create_firewall_instance(firewall)
     post_uri = @controller.get_ext_mount_config_uri(self)
     response = @controller.rest_agent.post_request(post_uri, firewall.to_hash,
       headers: {'Content-Type' => 'application/yang.data+json'})
-    NetconfResponse.new(NetconfResponseStatus::OK)
+    check_response_for_success(response) do
+      NetconfResponse.new(NetconfResponseStatus::OK)
+    end
   end
   
   def delete_firewall_instance(firewall)
@@ -46,22 +54,40 @@ class VRouter5600 < NetconfNode
       "vyatta-security:security/vyatta-security-firewall:firewall/name/"\
       "#{firewall_name}"
     response = @controller.rest_agent.delete_request(delete_uri)
-    NetconfResponse.new(NetconfResponseStatus::OK)
+    if response.code.to_i == 200
+      NetconfResponse.new(NetconfResponseStatus::OK)
+    else
+      handle_error_response(response)
+    end
   end
   
   def get_dataplane_interfaces_list
     response = get_interfaces_config
-    dp_interface_list = []
-    response.body['interfaces']['vyatta-interfaces-dataplane:dataplane'].each do |interface|
-      dp_interface_list << interface['tagnode']
+    check_response_for_success(response) do |body|
+      if body.has_key?('interfaces') && body['interfaces'].is_a?(Hash) &&
+          body['interfaces'].has_key?('vyatta-interfaces-dataplane:dataplane')
+        dp_interface_list = []
+        body['interfaces']['vyatta-interfaces-dataplane:dataplane'].each do |interface|
+          dp_interface_list << interface['tagnode']
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, dp_interface_list)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
     end
-    NetconfResponse.new(NetconfResponseStatus::OK, dp_interface_list)
   end
   
   def get_dataplane_interfaces_cfg
     response = get_interfaces_config
-    NetconfResponse.new(NetconfResponseStatus::OK,
-      response.body['interfaces']['vyatta-interfaces-dataplane:dataplane'])
+    check_response_for_success(response) do |body|
+      if body.has_key?('interfaces') && body['interfaces'].is_a?(Hash) &&
+          body['interfaces'].has_key?('vyatta-interfaces-dataplane:dataplane')
+        NetconfResponse.new(NetconfResponseStatus::OK,
+          body['interfaces']['vyatta-interfaces-dataplane:dataplane'])
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
   
   def get_dataplane_interface_cfg(interface_name)
@@ -69,22 +95,36 @@ class VRouter5600 < NetconfNode
       "vyatta-interfaces:interfaces/vyatta-interfaces-dataplane:dataplane/"\
       "#{interface_name}"
     response = @controller.rest_agent.get_request(get_uri)
-    NetconfResponse.new(NetconfResponseStatus::OK, JSON.parse(response.body))
+    check_response_for_success(response) do |body|
+      NetconfResponse.new(NetconfResponseStatus::OK, body)
+    end
   end
   
   def get_loopback_interfaces_list
     response = get_interfaces_config
-    lb_interface_list = []
-    response.body['interfaces']['vyatta-interfaces-loopback:loopback'].each do |interface|
-      lb_interface_list << interface['tagnode']
+    check_response_for_success(response) do |body|
+      if body.has_key?('interfaces') && body['interfaces'].is_a?(Hash) &&
+          body['interfaces'].has_key?('vyatta-interfaces-loopback:loopback')
+        lb_interface_list = []
+        body['interfaces']['vyatta-interfaces-loopback:loopback'].each do |interface|
+          lb_interface_list << interface['tagnode']
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, lb_interface_list)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
     end
-    NetconfResponse.new(NetconfResponseStatus::OK, lb_interface_list)
   end
   
   def get_loopback_interfaces_cfg
     response = get_interfaces_config
-    NetconfResponse.new(NetconfResponseStatus::OK,
-      response.body['interfaces']['vyatta-interfaces-loopback:loopback'])
+    check_response_for_success(response) do |body|
+      if body.has_key?('interfaces') && body['interfaces'].is_a?(Hash) &&
+          body['interfaces'].has_key?('vyatta-interfaces-loopback:loopback')
+        NetconfResponse.new(NetconfResponseStatus::OK,
+          body['interfaces']['vyatta-interfaces-loopback:loopback'])
+      end
+    end
   end
   
   def get_loopback_interface_cfg(interface_name)
@@ -92,7 +132,9 @@ class VRouter5600 < NetconfNode
       "vyatta-interfaces:interfaces/vyatta-interfaces-loopback:loopback/"\
       "#{interface_name}"
     response = @controller.rest_agent.get_request(get_uri)
-    NetconfResponse.new(NetconfResponseStatus::OK, JSON.parse(response.body))
+    check_response_for_success(response) do |body|
+      NetconfResponse.new(NetconfResponseStatus::OK, body)
+    end
   end
   
   def set_dataplane_interface_firewall(interface_name,
@@ -104,7 +146,11 @@ class VRouter5600 < NetconfNode
     put_uri = "#{@controller.get_ext_mount_config_uri(self)}/#{dpif.get_uri}"
     response = @controller.rest_agent.put_request(put_uri, dpif.to_hash,
       headers: {'Content-Type' => 'application/yang.data+json'})
-    NetconfResponse.new(NetconfResponseStatus::OK)
+    if response.code.to_i == 200
+      NetconfResponse.new(NetconfResponseStatus::OK)
+    else
+      handle_error_response(response)
+    end
   end
   
   def delete_dataplane_interface_firewall(interface_name)
@@ -112,7 +158,39 @@ class VRouter5600 < NetconfNode
       "vyatta-interfaces:interfaces/vyatta-interfaces-dataplane:dataplane/"\
       "#{interface_name}/vyatta-security-firewall:firewall"
     response = @controller.rest_agent.delete_request(delete_uri)
-    NetconfResponse.new(NetconfResponseStatus::OK)
+    if response.code.to_i == 200
+      NetconfResponse.new(NetconfResponseStatus::OK)
+    else
+      handle_error_response(response)
+    end
+  end
+  
+  def get_interfaces_list
+    response = get_interfaces_config
+    check_response_for_success(response) do |body|
+      if body.has_key?('interfaces') && body['interfaces'].is_a?(Hash)
+        if_list = []
+        body['interfaces'].each do |if_name, interfaces|
+          interfaces.each do |interface|
+            if_list << interface['tagnode']
+          end
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, if_list)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
+  end
+  
+  def get_interfaces_cfg
+    response = get_interfaces_config
+    check_response_for_success(response) do |body|
+      if body.has_key?('interfaces') && body['interfaces'].is_a?(Hash)
+        NetconfResponse.new(NetconfResponseStatus::OK, body)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
   end
 
   private
@@ -120,7 +198,6 @@ class VRouter5600 < NetconfNode
   def get_interfaces_config
     get_uri = "#{@controller.get_ext_mount_config_uri(self)}/"\
       "vyatta-interfaces:interfaces"
-    response = @controller.rest_agent.get_request(get_uri)
-    NetconfResponse.new(NetconfResponseStatus::OK, JSON.parse(response.body))
+    @controller.rest_agent.get_request(get_uri)
   end
 end

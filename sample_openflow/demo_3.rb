@@ -16,7 +16,7 @@ controller = Controller.new(ip_addr: config['controller']['ip_addr'],
   admin_password: config['controller']['password'])
 puts "Controller: #{JSON.pretty_generate controller.to_hash}"
 
-name = "openflow:1"
+name = config['node']['name']
 puts "\nGet information for ports on OpenFlowNode: #{name}"
 sleep(delay)
 of_switch = OFSwitch.new(controller: controller, name: name)

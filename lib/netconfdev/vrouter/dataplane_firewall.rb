@@ -11,6 +11,8 @@ class DataplaneFirewall
   end
   
   def to_hash
-    
+    {'vyatta-interfaces-dataplane:dataplane' => {:tagnode => @name,
+      'vyatta-security-firewall:firewall' => {:in => [@in_firewall],
+        :out => [@out_firewall]}}}
   end
 end

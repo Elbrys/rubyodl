@@ -163,6 +163,22 @@ class Controller
     end
   end
   
+  def get_nodes_operational_list
+    get_uri = "/restconf/operational/opendaylight-inventory:nodes"
+    response = @rest_agent.get_request(get_uri)
+    check_response_for_success(response) do |body|
+      if body.has_key?('nodes') && body['nodes'].has_key?('node')
+        list = []
+        body['nodes']['node'].each do |node|
+          list << node['id'] if node['id']
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, list)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
+  end
+  
   def get_openflow_nodes_operational_list
     get_uri = "/restconf/operational/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
@@ -173,6 +189,19 @@ class Controller
           filtered_list << node['id'] if node['id'].start_with?('openflow')
         end
         NetconfResponse.new(NetconfResponseStatus::OK, filtered_list)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
+  end
+  
+  def get_node_info(node_name)
+    get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
+      "#{node_name}"
+    response = @rest_agent.get_request(get_uri)
+    check_response_for_success(response) do |body|
+      if body.has_key?('node')
+        NetconfResponse.new(NetconfResponseStatus::OK, body['node'])
       else
         NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
       end
