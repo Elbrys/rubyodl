@@ -152,7 +152,7 @@ RSpec.describe Controller do
       expect(response.body).to eq(JSON.parse(streams)['streams'])
     end
 
-    it 'shows the configured NETCONF nodes' do
+    it 'shows the configured nodes' do
       nodes = {:nodes => {:node => [{:id => 'node-id'}]}}.to_json
       WebMock.stub_request(:get,
         "http://#{controller.username}:#{controller.password}@"\
@@ -162,6 +162,35 @@ RSpec.describe Controller do
       response = controller.get_all_nodes_in_config
       expect(response.status).to eq(NetconfResponseStatus::OK)
       expect(response.body).to eq([JSON.parse(nodes)['nodes']['node'][0]['id']])
+    end
+    
+    it 'shows the configured NETCONF nodes' do
+      nodes = {:nodes => {:node => [{:id => 'node-id'},
+          {:id => 'openflow:1'}]}}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/config/"\
+        "opendaylight-inventory:nodes").to_return(:body => nodes)
+
+      response = controller.get_netconf_nodes_in_config
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body).to eq([JSON.parse(nodes)['nodes']['node'][0]['id']])
+    end
+    
+    it 'shows the configured NETCONF nodes connection status' do
+      node_id = "node-id"
+      of_node_id = "openflow:1"
+      connection_status = {:nodes => {:node => [{:id => node_id,
+            'netconf-node-inventory:connected' => true},
+          {:id => of_node_id}]}}.to_json
+      WebMock.stub_request(:get,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/operational/"\
+        "opendaylight-inventory:nodes").to_return(:body => connection_status)
+
+      response = controller.get_netconf_nodes_conn_status
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+      expect(response.body).to eq([{:node => node_id, :connected => true}])
     end
     
     it 'gets a list of all operational nodes' do
@@ -247,8 +276,10 @@ RSpec.describe Controller do
 
     it 'shows connections status for all nodes' do
       node_id = "node-id"
+      of_node_id = "openflow:1"
       connection_status = {:nodes => {:node => [{:id => node_id,
-            'netconf-node-inventory:connected' => true}]}}.to_json
+            'netconf-node-inventory:connected' => true},
+          {:id => of_node_id}]}}.to_json
       WebMock.stub_request(:get,
         "http://#{controller.username}:#{controller.password}@"\
         "#{controller.ip}:#{controller.port}/restconf/operational/"\
@@ -256,7 +287,8 @@ RSpec.describe Controller do
 
       response = controller.get_all_nodes_conn_status
       expect(response.status).to eq(NetconfResponseStatus::OK)
-      expect(response.body).to eq([{:node => node_id, :connected => true}])
+      expect(response.body).to include({:node => node_id, :connected => true})
+      expect(response.body).to include({:node => of_node_id, :connected => true})
     end
 
     it 'shows connection status for a particular node when node connected' do

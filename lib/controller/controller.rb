@@ -171,6 +171,42 @@ class Controller
     end
   end
   
+  def get_netconf_nodes_in_config
+    get_uri = "/restconf/config/opendaylight-inventory:nodes"
+    response = @rest_agent.get_request(get_uri)
+    check_response_for_success(response) do |body|
+      if body.has_key?('nodes') && body['nodes'].has_key?('node')
+        devices = []
+        body['nodes']['node'].each do |node|
+          devices << node['id'] unless node['id'].include?('openflow')
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, devices)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
+  end
+  
+  def get_netconf_nodes_conn_status
+    get_uri = "/restconf/operational/opendaylight-inventory:nodes"
+    response = @rest_agent.get_request(get_uri)
+    check_response_for_success(response) do |body|
+      if body.has_key?('nodes') && body['nodes'].has_key?('node')
+        conn_list = []
+        body['nodes']['node'].each do |node|
+          unless node['id'].include?('openflow')
+            conn_status = {:node => node['id'],
+              :connected => node['netconf-node-inventory:connected']}
+            conn_list << conn_status
+          end
+        end
+        NetconfResponse.new(NetconfResponseStatus::OK, conn_list)
+      else
+        NetconfResponse.new(NetconfResponseStatus::DATA_NOT_FOUND)
+      end
+    end
+  end
+  
   def get_nodes_operational_list
     get_uri = "/restconf/operational/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
@@ -257,8 +293,16 @@ class Controller
       if body.has_key?('nodes') && body['nodes'].has_key?('node')
         conn_list = []
         body['nodes']['node'].each do |node|
+          is_connected = false
+          if node['id'].include?('openflow')
+            # OpenFlow devices connect to controller (unlike NETCONF nodes),
+            # so if we see one, then it is 'connected'
+            is_connected = true
+          elsif node.has_key?('netconf-node-inventory:connected')
+            is_connected = node['netconf-node-inventory:connected']
+          end
           conn_status = {:node => node['id'],
-            :connected => node['netconf-node-inventory:connected']}
+            :connected => is_connected}
           conn_list << conn_status
         end
         NetconfResponse.new(NetconfResponseStatus::OK, conn_list)
