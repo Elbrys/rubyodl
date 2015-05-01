@@ -27,8 +27,8 @@ class NetconfResponse
       "Internal server error"
     when NetconfResponseStatus::HTTP_ERROR
       msg = "HTTP error"
-      msg += " #{@body.code}" if @body.code
-      msg += " - #{@body.message}" if @body.message
+      msg += " #{@body.code}" if @body && @body.code
+      msg += " - #{@body.message}" if @body && @body.message
       msg
     when NetconfResponseStatus::DATA_NOT_FOUND
       "Requested data not found"

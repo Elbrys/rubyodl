@@ -15,13 +15,17 @@ class Controller
   
   def initialize(ip_addr: nil, port_number: 8181, admin_name: nil,
       admin_password: nil, timeout_in_s: 5)
+    raise ArgumentError, "IP Address (ip_addr) required" unless ip_addr
+    raise ArgumentError, "Admin Username (admin_name) required" unless admin_name
+    raise ArgumentError, "Admin Password (admin_password) required" unless admin_password
     @ip = ip_addr
     @port = port_number
     @username = admin_name
     @password = admin_password
-    @timeout = timeout
+    @timeout = timeout_in_s
     
-    @rest_agent = RestAgent.new("http://#{@ip}:#{@port}", username: @username, password: @password)
+    @rest_agent = RestAgent.new("http://#{@ip}:#{@port}", username: @username,
+      password: @password, open_timeout: @timeout)
   end
   
   def get_schemas(node_name)
@@ -38,6 +42,8 @@ class Controller
   end
   
   def get_schema(node_name, id: nil, version: nil)
+    raise ArgumentError, "Identifier (id) required" unless id
+    raise ArgumentError, "Version (version) required" unless version
     post_uri = "/restconf/operations/opendaylight-inventory:nodes/node/"\
       "#{node_name}/yang-ext:mount/ietf-netconf-monitoring:get-schema"
     post_body = {:input => {:identifier => id, :version => version,
@@ -107,10 +113,12 @@ class Controller
     end
   end
   
-  def get_module_operational_state(module_type, module_name)
+  def get_module_operational_state(type: nil, name: nil)
+    raise ArgumentError, "Type (type) required" unless type
+    raise ArgumentError, "Name (name) required" unless name
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:modules/module/"\
-      "#{module_type}/#{module_name}"
+      "#{type}/#{name}"
     response = @rest_agent.get_request(get_uri)
     check_response_for_success(response) do |body|
       if body.has_key?('module')
@@ -218,7 +226,6 @@ class Controller
   end
   
   def check_node_conn_status(node_name)
-    netconf_response = nil
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "#{node_name}"
     response = @rest_agent.get_request(get_uri)
@@ -288,14 +295,22 @@ class Controller
   end
   
   def get_node_operational_uri(node)
+    raise ArgumentError, "Node (node) must be a 'Node' object or a 'Node' "\
+      "subclass object" unless node.is_a?(Node) ||
+      (node.methods.include?(:ancestors) && node.ancestors.include?(Node))
     "/restconf/operational/opendaylight-inventory:nodes/node/#{node.name}"
   end
   
   def get_node_config_uri(node)
+    raise ArgumentError, "Node (node) must be a 'Node' object or a 'Node' "\
+      "subclass object" unless node.is_a?(Node) ||
+      (node.methods.include?(:ancestors) && node.ancestors.include?(Node))
     "/restconf/config/opendaylight-inventory:nodes/node/#{node.name}"
   end
   
   def get_ext_mount_config_uri(node)
+    raise ArgumentError, "Node (node) must be a 'Node' object or a 'Node' "\
+      "subclass object" unless node.is_a?(Node)
     "/restconf/config/opendaylight-inventory:nodes/node/#{node.name}/yang-ext:mount"
   end
   

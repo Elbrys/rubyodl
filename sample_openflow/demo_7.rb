@@ -23,11 +23,11 @@ name = config['node']['name']
 of_switch = OFSwitch.new(controller: controller, name: name)
 # Ethernet type MUST be 2048 (0x800) -> IPv4 protocol
 eth_type = 2048
-eth_src = "00:1c:01:00:23:aa"
-eth_dst = "00:02:02:60:ff:fe"
+eth_src = "00:1a:1b:00:22:aa"
+eth_dst = "00:2b:00:60:ff:f1"
 ipv4_src = "44.44.44.1/24"
 ipv4_dst = "55.55.55.1/16"
-input_port = 1
+input_port = 13
 
 puts "\nMatch: Ethernet Type 0x#{eth_type.to_s(16)}, Ethernet source #{eth_src}"\
   ", Ethernet destination #{eth_dst}, IPv4 source #{ipv4_src}, "\
@@ -73,6 +73,17 @@ response = of_switch.get_configured_flow(table_id: table_id, flow_id: flow_id)
 if response.status == NetconfResponseStatus::OK
   puts "Flow successfully read from the controller"
   puts "Flow info: #{JSON.pretty_generate response.body}"
+else
+  puts "\nDemo terminated: #{response.message}"
+  exit
+end
+
+puts "\nDelete flow with ID #{flow_id} from Controller's cache and from table "\
+  "#{table_id} on #{name} node"
+sleep(delay)
+response = of_switch.delete_flow(flow_id: flow_id, table_id: table_id)
+if response.status == NetconfResponseStatus::OK
+  puts "Flow successfully removed from the controller"
 else
   puts "\nDemo terminated: #{response.message}"
   exit

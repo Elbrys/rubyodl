@@ -1,5 +1,10 @@
 class DataplaneFirewall
-  def initialize(interface_name: nil, in_firewall_name: nil, out_firewall_name: nil)
+  def initialize(interface_name: nil, in_firewall_name: nil,
+      out_firewall_name: nil)
+    raise ArgumentError, "Interface Name (interface_name) required" unless interface_name
+    raise ArgumentError, "At least one firewall name (in_firewall_name, "\
+      "out_firewall_name) required" unless in_firewall_name || out_firewall_name
+    
     @name = interface_name
     @in_firewall = in_firewall_name
     @out_firewall = out_firewall_name

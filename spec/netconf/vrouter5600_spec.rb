@@ -4,7 +4,7 @@ require 'netconfdev/vrouter/vrouter5600'
 RSpec.describe VRouter5600 do
   let(:controller) { Controller.new(ip_addr: '1.2.3.4', port_number: '1234',
     admin_name: 'username', admin_password: 'password') }
-  let(:vrouter) { VRouter5600.new(controller: controller, node_name: 'vrouter',
+  let(:vrouter) { VRouter5600.new(controller: controller, name: 'vrouter',
     ip_addr: '4.3.2.1', port_number: '4321', admin_name: 'vrouter_user',
     admin_password: 'vrouter_pass') }
 
@@ -75,7 +75,7 @@ RSpec.describe VRouter5600 do
     rules = Rules.new(name: 'firewall-group')
     rule = Rule.new(rule_number: 1, action: 'accept', source_address: '1.2.3.4')
     rules.add_rule(rule)
-    firewall = Firewall.new(rules: rule)
+    firewall = Firewall.new(rules: rules)
     firewall_json = firewall.to_hash.to_json
     
     WebMock.stub_request(:post,
@@ -283,5 +283,28 @@ RSpec.describe VRouter5600 do
   
     response = vrouter.delete_dataplane_interface_firewall(interface_name)
     expect(response.status).to eq(NetconfResponseStatus::OK)
+  end
+  
+  describe 'argument validation' do
+    it 'requires an identifier for a schema lookup' do
+      expect { vrouter.get_schema }.to raise_error(ArgumentError,
+        "Identifier (id) required")
+    end
+    
+    it 'requires a version for a schema lookup' do
+      expect { vrouter.get_schema(id: 'schema-id') }.to raise_error(ArgumentError,
+        "Version (version) required")
+    end
+    
+    it 'requires at least one firewall name to be provided when setting the firewall' do
+      expect { vrouter.set_dataplane_interface_firewall('interface-name') }.
+        to raise_error(ArgumentError, "At least one firewall "\
+            "(inbound_firewall_name, outbound_firewall_name) required")
+    end
+    
+    it 'requires a firewall instance to be passed to create a firewall instance' do
+      expect { vrouter.create_firewall_instance("firewall") }.
+        to raise_error(ArgumentError, "Firewall must be instance of 'Firewall'")
+    end
   end
 end

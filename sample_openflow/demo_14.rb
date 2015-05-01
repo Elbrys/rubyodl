@@ -40,7 +40,7 @@ flow_id = 21
 table_id = 0
 flow_entry = FlowEntry.new(flow_table_id: table_id, flow_id: flow_id,
   flow_priority: 1012, cookie: 401, cookie_mask: 255, hard_timeout: 1200,
-  idle_timeout: 3400)
+  idle_timeout: 3400, name: 'Push VLAN 100')
 # Instruction: 'Appy-action'
 #     Actions: 'PushVlan'
 #              'Set Field'
@@ -78,6 +78,17 @@ response = of_switch.get_configured_flow(table_id: table_id, flow_id: flow_id)
 if response.status == NetconfResponseStatus::OK
   puts "Flow successfully read from the controller"
   puts "Flow info: #{JSON.pretty_generate response.body}"
+else
+  puts "\nDemo terminated: #{response.message}"
+  exit
+end
+
+puts "\nDelete flow with ID #{flow_id} from Controller's cache and from table "\
+  "#{table_id} on #{name} node"
+sleep(delay)
+response = of_switch.delete_flow(flow_id: flow_id, table_id: table_id)
+if response.status == NetconfResponseStatus::OK
+  puts "Flow successfully removed from the controller"
 else
   puts "\nDemo terminated: #{response.message}"
   exit

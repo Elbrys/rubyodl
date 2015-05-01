@@ -1,11 +1,16 @@
-class NetconfNode
-  attr_reader :name, :ip, :port, :username, :password, :tcp_only
+require 'controller/node'
+class NetconfNode < Node
+  attr_reader :ip, :port, :username, :password, :tcp_only
   
-  def initialize(controller: nil, node_name: nil, ip_addr: nil,
+  def initialize(controller: nil, name: nil, ip_addr: nil,
       port_number: nil, admin_name: nil, admin_password: nil,
       tcp_only: false)
-    @controller = controller
-    @name = node_name
+    super(controller: controller, name: name)
+    raise ArgumentError, "IP Address (ip_addr) required" unless ip_addr
+    raise ArgumentError, "Port Number (port_number) required" unless port_number
+    raise ArgumentError, "Admin Username (admin_name) required" unless admin_name
+    raise ArgumentError, "Admin Password (admin_password) required" unless admin_password
+    
     @ip = ip_addr
     @port = port_number
     @username = admin_name

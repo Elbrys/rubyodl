@@ -95,4 +95,15 @@ else
   exit
 end
 
+puts "\nDelete flow with ID #{flow_id} from Controller's cache and from table "\
+  "#{table_id} on #{name} node"
+sleep(delay)
+response = of_switch.delete_flow(flow_id: flow_id, table_id: table_id)
+if response.status == NetconfResponseStatus::OK
+  puts "Flow successfully removed from the controller"
+else
+  puts "\nDemo terminated: #{response.message}"
+  exit
+end
+
 puts "\nEnd of demo 11"

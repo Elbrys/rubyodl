@@ -9,6 +9,9 @@ class VRouter5600 < NetconfNode
   end
   
   def get_schema(id: nil, version: nil)
+    raise ArgumentError, "Identifier (id) required" unless id
+    raise ArgumentError, "Version (version) required" unless version
+    
     @controller.get_schema(@name, id: id, version: version)
   end
   
@@ -29,7 +32,9 @@ class VRouter5600 < NetconfNode
     end
   end
   
-  def get_firewall_instance_cfg(firewall_name)
+  def get_firewall_instance_cfg(firewall_or_name)
+    firewall_name = firewall_or_name.is_a?(Firewall) ? firewall_or_name.rules.name :
+      firewall_or_name 
     get_uri = "#{@controller.get_ext_mount_config_uri(self)}/"\
       "vyatta-security:security/vyatta-security-firewall:firewall/name/"\
       "#{firewall_name}"
@@ -40,6 +45,7 @@ class VRouter5600 < NetconfNode
   end
   
   def create_firewall_instance(firewall)
+    raise ArgumentError, "Firewall must be instance of 'Firewall'" unless firewall.is_a?(Firewall)
     post_uri = @controller.get_ext_mount_config_uri(self)
     response = @controller.rest_agent.post_request(post_uri, firewall.to_hash,
       headers: {'Content-Type' => 'application/yang.data+json'})
@@ -48,8 +54,9 @@ class VRouter5600 < NetconfNode
     end
   end
   
-  def delete_firewall_instance(firewall)
-    firewall_name = firewall.rules.name
+  def delete_firewall_instance(firewall_or_name)
+    firewall_name = firewall_or_name.is_a?(Firewall) ? firewall_or_name.rules.name :
+      firewall_or_name
     delete_uri = "#{@controller.get_ext_mount_config_uri(self)}/"\
       "vyatta-security:security/vyatta-security-firewall:firewall/name/"\
       "#{firewall_name}"
@@ -139,6 +146,8 @@ class VRouter5600 < NetconfNode
   
   def set_dataplane_interface_firewall(interface_name,
       inbound_firewall_name: nil, outbound_firewall_name: nil)
+    raise ArgumentError, "At least one firewall (inbound_firewall_name, "\
+      "outbound_firewall_name) required" unless inbound_firewall_name || outbound_firewall_name
     dpif = DataplaneFirewall.new(interface_name: interface_name,
       in_firewall_name: inbound_firewall_name,
       out_firewall_name: outbound_firewall_name)

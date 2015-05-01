@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'openflowdev/actions/drop_action'
 require 'openflowdev/of_switch'
 
 RSpec.describe OFSwitch do
@@ -6,7 +7,7 @@ RSpec.describe OFSwitch do
       admin_name: 'username', admin_password: 'password')}
   let(:switch) { OFSwitch.new(controller: controller, name: 'switch-name', dpid: 'mac')}
   
-  context 'successful requests' do
+  describe 'successful requests' do
     it 'gets switch info' do
       config_status = {:node => [{:id => switch.name,
           'flow-node-inventory:manufacturer' => "manufacturer",
@@ -131,6 +132,20 @@ RSpec.describe OFSwitch do
       expect(response.status).to eq(NetconfResponseStatus::OK)
       expect(response.body).to eq(JSON.parse(configured_flow))
     end
+    
+    it 'deletes a particular flow' do
+      table_id = "1"
+      flow_id = "2"
+      
+      WebMock.stub_request(:delete,
+        "http://#{controller.username}:#{controller.password}@"\
+        "#{controller.ip}:#{controller.port}/restconf/config/"\
+        "opendaylight-inventory:nodes/node/#{switch.name}/"\
+        "table/#{table_id}/flow/#{flow_id}")
+    
+      response = switch.delete_flow(table_id: table_id, flow_id: flow_id)
+      expect(response.status).to eq(NetconfResponseStatus::OK)
+    end
 
     it 'gets operational flows' do
       table_id = 0
@@ -238,7 +253,7 @@ RSpec.describe OFSwitch do
     end
   end
   
-  context 'erroneous requests' do
+  describe 'erroneous requests' do
     it 'returns a CONN_ERROR status when no response is returned' do
       address = "http://#{controller.ip}:#{controller.port}/restconf/"\
         "operational/opendaylight-inventory:nodes/node/#{switch.name}"
@@ -285,6 +300,58 @@ RSpec.describe OFSwitch do
 
       response = switch.get_switch_info
       expect(response.status).to eq(NetconfResponseStatus::HTTP_ERROR)
+    end
+  end
+  
+  describe 'argument validation' do
+    it 'requires a controller on instantiation' do
+      expect { OFSwitch.new }.to raise_error(ArgumentError,
+        "Controller (controller) required")
+    end
+    
+    it 'requires a name on instantiation' do
+      expect { OFSwitch.new(controller: controller) }.to raise_error(ArgumentError,
+        "Name (name) required")
+    end
+    
+    it 'requires a table id for retrieving a configured flow' do
+      expect { switch.get_configured_flow }.to raise_error(ArgumentError,
+        "Table ID (table_id) required")
+    end
+    
+    it 'requires a flow id for retrieving a configured flow' do
+      expect { switch.get_configured_flow(table_id: 0) }.
+        to raise_error(ArgumentError, "Flow ID (flow_id) required")
+    end
+    
+    it 'requires a table id for deleting a configured flow' do
+      expect { switch.delete_flow }.to raise_error(ArgumentError,
+        "Table ID (table_id) required")
+    end
+    
+    it 'requires a flow id for deleting a configured flow' do
+      expect { switch.delete_flow(table_id: 0) }. to raise_error(ArgumentError,
+        "Flow ID (flow_id) required")
+    end
+    
+    it 'requires a table id for retrieving a list of operational flows' do
+      expect { switch.get_operational_flows }.to raise_error(ArgumentError,
+        "Table ID (table_id) required")
+    end
+    
+    it 'requires a table id for retrieving a list of configured flows' do
+      expect { switch.get_configured_flows }.to raise_error(ArgumentError,
+       "Table ID (table_id) required")
+    end
+    
+    it 'requires a table id to get a list of operational flows in OVS format' do
+      expect { switch.get_operational_flows_ovs_syntax }.
+        to raise_error(ArgumentError, "Table ID (table_id) required")
+    end
+    
+    it 'requires a table id to get a list of configured flows in OVS format' do
+      expect { switch.get_configured_flows_ovs_syntax }.
+        to raise_error(ArgumentError, "Table ID (table_id) required")
     end
   end
  end

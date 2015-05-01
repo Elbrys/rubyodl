@@ -1,4 +1,4 @@
-require 'openflowdev/action'
+require 'openflowdev/actions/action'
 
 class DropAction < Action
   def to_hash

@@ -5,7 +5,7 @@ RSpec.describe Controller do
   let(:controller) { Controller.new(ip_addr: '1.2.3.4', port_number: '1234',
       admin_name: 'username', admin_password: 'password')}
   
-  context 'successful response' do
+  describe 'successful response' do
     it 'gets a list of schemas for a particular node' do
       node_name = "that-node"
       schemas = {:schemas => {:schema => [{:identifier => 'schema-identifier',
@@ -118,7 +118,8 @@ RSpec.describe Controller do
         "config:modules/module/#{module_type}/#{module_name}").
       to_return(:body => state)
 
-      response = controller.get_module_operational_state(module_type, module_name)
+      response = controller.get_module_operational_state(type: module_type,
+        name: module_name)
       expect(response.status).to eq(NetconfResponseStatus::OK)
       expect(response.body).to eq(JSON.parse(state)['module'])
     end
@@ -189,7 +190,7 @@ RSpec.describe Controller do
     end
 
     it 'adds a node' do
-      new_node = NetconfNode.new(controller: controller, node_name: 'test-node',
+      new_node = NetconfNode.new(controller: controller, name: 'test-node',
         ip_addr: '1.2.3.5', port_number: 1234, admin_name: 'node-admin',
         admin_password: 'node-pass')
       
@@ -286,7 +287,7 @@ RSpec.describe Controller do
     end
 
     it 'removes a node' do
-      node = NetconfNode.new(controller: controller, node_name: 'test-node',
+      node = NetconfNode.new(controller: controller, name: 'test-node',
         ip_addr: '1.2.3.5', port_number: 1234, admin_name: 'node-admin',
         admin_password: 'node-pass')
       WebMock.stub_request(:delete,
@@ -301,7 +302,7 @@ RSpec.describe Controller do
     end
   end
   
-  context 'erroneous response' do
+  describe 'erroneous response' do
     it 'returns a CONN_ERROR status when no response is returned' do
       node_name = "that-node"
       address = "http://#{controller.ip}:#{controller.port}/restconf/operational/"\
@@ -369,6 +370,56 @@ RSpec.describe Controller do
 
       response = controller.check_node_conn_status(node_id)
       expect(response.status).to eq(NetconfResponseStatus::NODE_NOT_FOUND)
+    end
+  end
+  
+  describe 'argument validations' do
+    it 'requires an IP address for instantiation' do
+      expect { Controller.new }.to raise_error(ArgumentError,
+        "IP Address (ip_addr) required")
+    end
+    
+    it 'requires admin username for instantiation' do
+      expect { Controller.new(ip_addr: '1.2.3.4') }.to raise_error(ArgumentError,
+        "Admin Username (admin_name) required")
+    end
+    
+    it 'requires admin password for instantiation' do
+      expect { Controller.new(ip_addr: '1.2.3.4', admin_name: 'test') }.
+        to raise_error(ArgumentError, "Admin Password (admin_password) required")
+    end
+    
+    it 'requires an identifier for a schema lookup' do
+      node_name = "name"
+      expect { controller.get_schema(node_name) }.to raise_error(ArgumentError,
+        "Identifier (id) required")
+    end
+    
+    it 'requires a version for a schema lookup' do
+      node_name = "name"
+      expect { controller.get_schema(node_name, id: 'node-id') }.
+        to raise_error(ArgumentError, "Version (version) required")
+    end
+    
+    it 'requires a type for checking the operational state of a module' do
+      expect { controller.get_module_operational_state }.to raise_error(ArgumentError,
+        "Type (type) required")
+    end
+    
+    it 'requires a name for checking the operational state of a module' do
+      expect { controller.get_module_operational_state(type: 'module-type') }.
+        to raise_error(ArgumentError, "Name (name) required")
+    end
+    
+    it 'requires a Node (or subclass) to be used as an argument for obtaining URIs' do
+      expect { controller.get_node_operational_uri('name') }.to raise_error(ArgumentError,
+        "Node (node) must be a 'Node' object or a 'Node' subclass object")
+      
+      expect { controller.get_node_config_uri('name') }.to raise_error(ArgumentError,
+        "Node (node) must be a 'Node' object or a 'Node' subclass object")
+      
+      expect { controller.get_ext_mount_config_uri('name') }.to raise_error(ArgumentError,
+        "Node (node) must be a 'Node' object or a 'Node' subclass object")
     end
   end
 end

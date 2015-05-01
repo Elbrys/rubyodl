@@ -2,6 +2,8 @@ class Firewall
   attr_reader :rules
   
   def initialize(rules: nil)
+    raise ArgumentError, "Rules (rules) required" unless rules
+    raise ArgumentError, "Rules (rules) must be instance of 'Rules'" unless rules.is_a?(Rules)
     @rules = rules
   end
   

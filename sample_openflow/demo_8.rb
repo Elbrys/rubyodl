@@ -11,7 +11,7 @@ config = YAML.load_file('sample_openflow/config.yml')
 puts "\nStarting Demo 8: Setting OpenFlow flow on the Controller: "\
   "send to controller traffic with particular ethernet source and destination "\
   "addresses as well as specific ipv4 source and destination addresses coming "\
-  "in on a particular port following a particular IP protocol, DSCP and ECN"
+  "in on a particular port following a particular IP protocol and DSCP"
 
 puts "\nCreating controller instance"
 controller = Controller.new(ip_addr: config['controller']['ip_addr'],
@@ -25,17 +25,16 @@ of_switch = OFSwitch.new(controller: controller, name: name)
 eth_type = 2048
 eth_src = "00:1c:01:00:23:aa"
 eth_dst = "00:02:02:60:ff:fe"
-ipv4_src = "44.44.44.1/24"
-ipv4_dst = "55.55.55.1/16"
+ipv4_src = "10.0.245.1/24"
+ipv4_dst = "192.168.1.123/16"
 ip_proto = 56
 ip_dscp = 15
-ip_ecn = 1
 input_port = 1
 
 puts "\nMatch: Ethernet Type 0x#{eth_type.to_s(16)}, Ethernet source #{eth_src}"\
   ", Ethernet destination #{eth_dst}, IPv4 source #{ipv4_src}, "\
   "IPv4 destination #{ipv4_dst}, IP Protocol Number #{ip_proto}, "\
-  "IP DSCP #{ip_dscp}, IP ECN #{ip_ecn}, Input Port #{input_port}"
+  "IP DSCP #{ip_dscp}, Input Port #{input_port}"
 puts "Action: Output (controller)"
 
 sleep(delay)
@@ -58,12 +57,11 @@ flow_entry.add_instruction(instruction)
 #               IPv4 Destination Address
 #               IP Protocol Number
 #               IP DSCP
-#               IP ECN
 #               Input port
 match = Match.new(eth_type: eth_type, ethernet_source: eth_src,
   ethernet_destination: eth_dst, ipv4_destination: ipv4_dst,
   ipv4_source: ipv4_src, ip_protocol_num: ip_proto, ip_dscp: ip_dscp,
-  ip_ecn: ip_ecn, in_port: input_port)
+  in_port: input_port)
 flow_entry.add_match(match)
 
 puts "\nFlow to send: #{JSON.pretty_generate flow_entry.to_hash}"
@@ -82,6 +80,17 @@ response = of_switch.get_configured_flow(table_id: table_id, flow_id: flow_id)
 if response.status == NetconfResponseStatus::OK
   puts "Flow successfully read from the controller"
   puts "Flow info: #{JSON.pretty_generate response.body}"
+else
+  puts "\nDemo terminated: #{response.message}"
+  exit
+end
+
+puts "\nDelete flow with ID #{flow_id} from Controller's cache and from table "\
+  "#{table_id} on #{name} node"
+sleep(delay)
+response = of_switch.delete_flow(flow_id: flow_id, table_id: table_id)
+if response.status == NetconfResponseStatus::OK
+  puts "Flow successfully removed from the controller"
 else
   puts "\nDemo terminated: #{response.message}"
   exit

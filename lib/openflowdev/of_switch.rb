@@ -1,4 +1,5 @@
-class OFSwitch
+require 'controller/openflow_node'
+class OFSwitch < OpenflowNode
   require 'json'
   require 'controller/controller'
   require 'openflowdev/flow_entry'
@@ -7,8 +8,7 @@ class OFSwitch
   attr_reader :name
   
   def initialize(controller: nil, name: nil, dpid: nil)
-    @controller = controller
-    @name = name
+    super(controller: controller, name: name)
     @dpid = dpid
   end
   
@@ -128,6 +128,8 @@ class OFSwitch
   end
   
   def get_configured_flow(table_id: nil, flow_id: nil)
+    raise ArgumentError, "Table ID (table_id) required" unless table_id
+    raise ArgumentError, "Flow ID (flow_id) required" unless flow_id
     get_uri = "#{@controller.get_node_config_uri(self)}/table/#{table_id}/"\
       "flow/#{flow_id}"
     response = @controller.rest_agent.get_request(get_uri)
@@ -136,15 +138,31 @@ class OFSwitch
     end
   end
   
+  def delete_flow(table_id: nil, flow_id: nil)
+    raise ArgumentError, "Table ID (table_id) required" unless table_id
+    raise ArgumentError, "Flow ID (flow_id) required" unless flow_id
+    delete_uri = "#{@controller.get_node_config_uri(self)}/table/#{table_id}/"\
+      "flow/#{flow_id}"
+    response = @controller.rest_agent.delete_request(delete_uri)
+    if response.code.to_i == 200
+      NetconfResponse.new(NetconfResponseStatus::OK)
+    else
+      handle_error_response(response)
+    end
+  end
+  
   def get_operational_flows(table_id: nil)
+    raise ArgumentError, "Table ID (table_id) required" unless table_id
     get_flows(table_id: table_id)
   end
   
   def get_configured_flows(table_id: nil)
+    raise ArgumentError, "Table ID (table_id) required" unless table_id
     get_flows(table_id: table_id, is_operational: false)
   end
   
   def get_operational_flows_ovs_syntax(table_id: nil, sort: false)
+    raise ArgumentError, "Table ID (table_id) required" unless table_id
     response = get_operational_flows(table_id: table_id)
     if response.status == NetconfResponseStatus::OK
       flows = []
@@ -159,6 +177,7 @@ class OFSwitch
   end
   
   def get_configured_flows_ovs_syntax(table_id: nil, sort: false)
+    raise ArgumentError, "Table ID (table_id) required" unless table_id
     response = get_configured_flows(table_id: table_id)
     if response.status == NetconfResponseStatus::OK
       flows = []

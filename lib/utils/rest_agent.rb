@@ -8,11 +8,13 @@ class RestAgent
   
   $LOG = Logger.new('rubybvc-requests.log')
 
-  def initialize(service_uri, headers: {}, username: nil, password: nil)
+  def initialize(service_uri, headers: {}, username: nil, password: nil,
+      open_timeout: nil)
     @service_uri = URI(service_uri)
     @headers = {'Content-Type' => 'application/json', 'Accept' => 'application/json'}.merge(headers)
     @username = username
     @password = password
+    @open_timeout = open_timeout
   end
   
   def get_request(uri_endpoint, query_params = {})
@@ -55,14 +57,15 @@ class RestAgent
     request.basic_auth(@username, @password) unless @username.nil? || @username.empty?
     begin
       $LOG.info request.to_yaml
-      response =  Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
+      response =  Net::HTTP.start(uri.host, uri.port, :open_timeout => @open_timeout,
+        :use_ssl => uri.scheme == 'https') do |http|
         http.request(request)
       end
       $LOG.info response.to_yaml
       # catch html responses
       return response
-    rescue Net::HTTPHeaderSyntaxError, Net::HTTPBadResponse => e
-      #logger.error "Error connecting to #{@service_uri}: #{e.message}"
+    rescue Net::HTTPHeaderSyntaxError, Net::HTTPBadResponse, Net::OpenTimeout => e
+      $LOG.error "Error connecting to #{@service_uri}: #{e.message}"
       return nil
     end
   end

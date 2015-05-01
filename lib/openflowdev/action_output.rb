@@ -34,6 +34,8 @@ class ActionOutput
       else
         "#{@type}:#{@port}"
       end
+    else
+      ""
     end
   end
 end

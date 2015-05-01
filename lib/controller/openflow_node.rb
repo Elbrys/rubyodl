@@ -1,0 +1,3 @@
+class OpenflowNode < Node
+  
+end

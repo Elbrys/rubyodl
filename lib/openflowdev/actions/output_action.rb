@@ -1,6 +1,7 @@
 class OutputAction < Action
   def initialize(order: 0, port: nil, max_length: nil)
-    @order = order
+    super(order: order)
+    raise ArgumentError, "Port (port) required" unless port
     @port = port
     @max_length = max_length
   end
