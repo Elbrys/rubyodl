@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class used to define OpenFlow action to set the PCP field in VLAN header
 class SetVlanPCPAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +vlan_pcp+:: integer : The valoue to set in the PCP field in VLAN header.
   def initialize(order: nil, vlan_pcp: nil)
     super(order: order)
     raise ArgumentError, "VLAN PCP (vlan_pcp) required" unless vlan_pcp
     @vlan_pcp = vlan_pcp
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'set-vlan-pcp-action' => {'vlan-pcp' => @vlan_pcp}}
   end
 end

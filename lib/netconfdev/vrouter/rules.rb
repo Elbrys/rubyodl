@@ -28,9 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+##
+# The class that defines firewall Rules.
 class Rules
-  attr_reader :name, :rules
+
+  # String: Name of the firewall rule.
+  attr_reader :name
+
+  # List of Rule : List of Rule defining the firewall behavior.
+  attr_reader :rules
   
+# _Parameters_ 
+# * +name+:: String: Name of the firewall rule.
+#
   def initialize(name: nil)
     raise ArgumentError, "Name (name) required" unless name
     
@@ -38,12 +48,18 @@ class Rules
     @rules = []
   end
   
+  ##
+  # Add a rule to this firewall.
+  #
+  # _Parameters_ 
+  # * +rule+:: Rule : A Firewall Rule to add to this Firewall.  
+ 
   def add_rule(rule)
     raise ArgumentError, "Rule must be instance of 'Rule'" unless rule.is_a?(Rule)
     @rules << rule
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     rules_hash = []
     @rules.each do |rule|
       rules_hash << rule.to_hash

@@ -28,7 +28,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define an OpenFlow output action
 class OutputAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +port+:: integer : the port to target for output 
+# * +max_length+:: integer : When the ’port’ is the controller, this indicates the max number of 
+# bytes to send. A value of zero means no bytes of the packet should be sent. 
+# A value of OFPCML_NO_BUFFER (0xffff) means that the packet is not buffered and the 
+# complete packet is to be sent to the controller.
   def initialize(order: 0, port: nil, max_length: nil)
     super(order: order)
     raise ArgumentError, "Port (port) required" unless port
@@ -36,7 +45,7 @@ class OutputAction < Action
     @max_length = max_length
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'output-action' => {'max-length' => @max_length,
       'output-node-connector' => @port}}
   end

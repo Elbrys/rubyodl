@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class used to define OpenFlow action to set IP header Time To Live (network layer)
 class SetNwTTLAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +ip_ttl+:: integer : The Time To Live to set in the IP header.
   def initialize(order: 0, ip_ttl: nil)
     super(order: order)
     raise ArgumentError, "IP TTL (ip_ttl) required" unless ip_ttl
     @ip_ttl = ip_ttl
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'set-nw-ttl-action' => {'nw-ttl' => @ip_ttl}}
   end
 end

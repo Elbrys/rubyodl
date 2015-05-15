@@ -28,12 +28,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class that is used to define an OpenFlow POP VLAN header action.  Remove the VLAN encapsulation (Q-in-Q).
 class PopVlanHeaderAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
   def initialize(order: 0)
     super(order: order)
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'pop-vlan-action' => {}}
   end
 end

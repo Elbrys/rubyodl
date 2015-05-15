@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class used to define OpenFlow action for setting the Source IP address (network layer)
 class SetNwSrcAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +ip_addr+:: string : The IP address to set in source IP
   def initialize(order: nil, ip_addr: nil)
     super(order: order)
     raise ArgumentError, "IP Address (ip_addr) required" unless ip_addr
     @ip = ip_addr
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'set-nw-src-action' => {:address => @ip}}
   end
 end

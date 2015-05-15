@@ -28,6 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class defining the numeric status that may be returned from making a request to rubybvc
 class NetconfResponseStatus
   OK = 200
   NODE_CONNECTED = 210

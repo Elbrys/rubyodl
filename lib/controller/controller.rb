@@ -28,6 +28,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+##
+# Class that represents a Controller device.
+#
 class Controller
   require 'json'
   require 'utils/rest_agent'
@@ -36,15 +39,28 @@ class Controller
   require 'controller/netconf_node'
   require 'nokogiri'
   
+  # String : IP address of the BVC.  e.g. 192.168.56.101 
   attr_reader :ip
+  # String : Port number of the BVC RESTCONF API.   e.g. 8181
   attr_reader :port
+  # String : Admin userid for logon to BVC RESTCONF API.  e.g. admin
   attr_reader :username
+  # String : Admin password for logon to BVC RESTCONF API.  e.g. admin
   attr_reader :password
+  # Integer : Number of seconds to wait for a response from BVC to RESTCONF request.  e.g. 5
   attr_reader :timeout
+  # RestAgent : The REST agent connected to controller.
   attr_reader :rest_agent
   
+# _Parameters_ 
+# * +ip_addr+:: String : IP address of the BVC.  e.g. 192.168.56.101 
+# * +port_number+:: String : Port number of the BVC RESTCONF API.   e.g. 8181
+# * +admin_name+:: String : Admin userid for logon to BVC RESTCONF API.  e.g. admin
+# * +admin_password+:: String : Admin password for logon to BVC RESTCONF API.  e.g. admin
+# * +timeout_in_s+:: Integer : Number of seconds to wait for a response from BVC to RESTCONF request.  e.g. 5
+#
   def initialize(ip_addr: nil, port_number: 8181, admin_name: nil,
-      admin_password: nil, timeout_in_s: 5)
+      admin_password: nil, timeout_in_s: 5) 
     raise ArgumentError, "IP Address (ip_addr) required" unless ip_addr
     raise ArgumentError, "Admin Username (admin_name) required" unless admin_name
     raise ArgumentError, "Admin Password (admin_password) required" unless admin_password
@@ -58,6 +74,14 @@ class Controller
       password: @password, open_timeout: @timeout)
   end
   
+  ##
+  # Return a list of YANG schemas for the node.
+  #
+  # _Parameters_ 
+  # * +node_name+:: String : name of the node from the #get_all_nodes_in_config 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of YANG schemas for the node.
+
   def get_schemas(node_name)
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "#{node_name}/yang-ext:mount/ietf-netconf-monitoring:netconf-state/schemas"
@@ -71,6 +95,16 @@ class Controller
     end
   end
   
+  ##
+  # Return a YANG schema for the indicated schema on the indicated node.
+  #
+  # _Parameters_ 
+  # * +node_name+:: String : name of the node from the #get_all_nodes_in_config 
+  # * +id+:: String : Identifier for schema
+  # * +version+:: String : Version/date for schema
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and YANG schema.
+
   def get_schema(node_name, id: nil, version: nil)
     raise ArgumentError, "Identifier (id) required" unless id
     raise ArgumentError, "Version (version) required" unless version
@@ -90,6 +124,12 @@ class Controller
     end
   end
   
+  ##
+  # Return a list of service providers available.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and JSON providing a list of service providers.
+
   def get_service_providers_info
     get_uri = "/restconf/config/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:services"
@@ -103,6 +143,14 @@ class Controller
     end
   end
   
+  ##
+  # Return info about a single service provider.
+  #
+  # _Parameters_ 
+  # * +provider_name+:: name of the service provider from get_service_providers_info
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and JSON providing info about the service provider. 
+
   def get_service_provider_info(provider_name)
     get_uri = "/restconf/config/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:services/service/#{provider_name}"
@@ -116,6 +164,14 @@ class Controller
     end
   end
   
+  ##
+  # Return a list of operations supported by the indicated node.
+  #
+  # _Parameters_ 
+  # * +node_name+:: String : name of the node from the #get_all_nodes_in_config 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and operations supported by indicated node.
+
   def get_netconf_operations(node_name)
     get_uri = "/restconf/operations/opendaylight-inventory:nodes/node/"\
       "#{node_name}/yang-ext:mount"
@@ -129,6 +185,12 @@ class Controller
     end
   end
   
+  ##
+  # Return a list of modules and their operational state.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and JSON listing modules and their operational state
+
   def get_all_modules_operational_state
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:modules"
@@ -143,6 +205,15 @@ class Controller
     end
   end
   
+  ##
+  # Return operational state for specified module.
+  #
+  # _Parameters_ 
+  # * +type+:: String :  module type
+  # * +name+:: String :  module name
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and JSON providing operational state 
+
   def get_module_operational_state(type: nil, name: nil)
     raise ArgumentError, "Type (type) required" unless type
     raise ArgumentError, "Name (name) required" unless name
@@ -159,6 +230,14 @@ class Controller
     end
   end
   
+  ##
+  # Return sessions for indicated node.
+  #
+  # _Parameters_ 
+  # * +node_name+:: String : name of the node from the #get_all_nodes_in_config 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and JSON providing list of sessions.
+
   def get_sessions_info(node_name)
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "#{node_name}/yang-ext:mount/ietf-netconf-monitoring:netconf-state/"\
@@ -173,6 +252,12 @@ class Controller
     end
   end
   
+  ##
+  # Return streams available for subscription.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and JSON providing list of streams.
+
   def get_streams_info
     get_uri = "restconf/streams"
     response = @rest_agent.get_request(get_uri)
@@ -185,6 +270,12 @@ class Controller
     end
   end
   
+  ##
+  # Return a list of nodes in the controller's config data store
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of nodes in the config data store of the controller
+
   def get_all_nodes_in_config
     get_uri = "/restconf/config/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
@@ -201,7 +292,13 @@ class Controller
     end
   end
   
-  def get_netconf_nodes_in_config
+  ##
+  # Return a list of NETCONF nodes in the controller's configuration data store
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of nodes in the config data store of the controller
+
+  def get_netconf_nodes_in_config 
     get_uri = "/restconf/config/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
     check_response_for_success(response) do |body|
@@ -217,6 +314,12 @@ class Controller
     end
   end
   
+  ##
+  # Return a list of NETCONF nodes in the operational data store of controller and the status of their connection to the controller.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of nodes the status of their connection to the controller.
+
   def get_netconf_nodes_conn_status
     get_uri = "/restconf/operational/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
@@ -237,6 +340,12 @@ class Controller
     end
   end
   
+  ##
+  # Return a list of nodes in the controllers operational data store.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of nodes in controller's operational data store.
+
   def get_nodes_operational_list
     get_uri = "/restconf/operational/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
@@ -253,6 +362,12 @@ class Controller
     end
   end
   
+  ##
+  # Return a list of nodes that support OpenFlow in the Controller's operational data store.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of OpenFlow-capable nodes in the Controller's operational database.
+
   def get_openflow_nodes_operational_list
     get_uri = "/restconf/operational/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
@@ -269,6 +384,14 @@ class Controller
     end
   end
   
+  ##
+  # Return information about a node in the operational data store.
+  #
+  # _Parameters_ 
+  # * +node_name+:: String : name of the node in operational data store from the #get_nodes_operational_list 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and JSON data about the requested node.
+
   def get_node_info(node_name)
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "#{node_name}"
@@ -282,6 +405,14 @@ class Controller
     end
   end
   
+  ##
+  # Return the configuration status of the node.
+  #
+  # _Parameters_ 
+  # * +node_name+:: String : name of the node from the #get_all_nodes_in_config 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and configuration status of requested node.
+
   def check_node_config_status(node_name)
     get_uri = "/restconf/config/opendaylight-inventory:nodes/node/#{node_name}"
     response = @rest_agent.get_request(get_uri)
@@ -291,6 +422,14 @@ class Controller
     end
   end
   
+  ##
+  # Return the connection status of the node to the controller.
+  #
+  # _Parameters_ 
+  # * +node_name+:: String : name of the node from the #get_nodes_operational_list 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and Status of the node's connection to the controller.  Note: currently OpenFlow nodes are always shown disconnected..
+
   def check_node_conn_status(node_name)
     get_uri = "/restconf/operational/opendaylight-inventory:nodes/node/"\
       "#{node_name}"
@@ -316,6 +455,12 @@ class Controller
     end
   end
   
+  ##
+  # Return a list of nodes and the status of their connection to the controller.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of nodes and their connection to the controller.
+
   def get_all_nodes_conn_status
     get_uri = "/restconf/operational/opendaylight-inventory:nodes"
     response = @rest_agent.get_request(get_uri)
@@ -342,6 +487,14 @@ class Controller
     end
   end
   
+  ##
+  # Connect a netconf device to the controller (for example connect vrouter to controller via NetConf)
+  #
+  # _Parameters_ 
+  # * +node+:: NetconfNode : A netconf node. 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and JSON providing response from adding the node.
+
   def add_netconf_node(node)
     post_uri = "/restconf/config/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:modules"
@@ -354,6 +507,14 @@ class Controller
     end
   end
   
+  ##
+  # Disconnect a netconf device from the controller.
+  #
+  # _Parameters_ 
+  # * +node+:: NetconfNode : node to disconnect from the controller. 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and response if error.
+
   def delete_netconf_node(node)
     delete_uri = "/restconf/config/opendaylight-inventory:nodes/node/"\
       "controller-config/yang-ext:mount/config:modules/module/"\
@@ -368,6 +529,14 @@ class Controller
     end
   end
   
+  ##
+  # Return the url to the operational node.
+  #
+  # _Parameters_ 
+  # * +node+:: NetconfNode : node for which to return the url. 
+  # _Return_ _Value_
+  # * String: Url
+
   def get_node_operational_uri(node)
     raise ArgumentError, "Node (node) must be a 'Node' object or a 'Node' "\
       "subclass object" unless node.is_a?(Node) ||
@@ -375,6 +544,14 @@ class Controller
     "/restconf/operational/opendaylight-inventory:nodes/node/#{node.name}"
   end
   
+  ##
+  # Return the url to the configured node.
+  #
+  # _Parameters_ 
+  # * +node+:: NetconfNode : node for which to return the url. 
+  # _Return_ _Value_
+  # * String: Url
+
   def get_node_config_uri(node)
     raise ArgumentError, "Node (node) must be a 'Node' object or a 'Node' "\
       "subclass object" unless node.is_a?(Node) ||
@@ -382,13 +559,22 @@ class Controller
     "/restconf/config/opendaylight-inventory:nodes/node/#{node.name}"
   end
   
+  ##
+  # Return the netconf mountpoint url to the configured node.
+  #
+  # _Parameters_ 
+  # * +node+:: NetconfNode : node for which to return the url. 
+  # _Return_ _Value_
+  # * String: Url
+
   def get_ext_mount_config_uri(node)
     raise ArgumentError, "Node (node) must be a 'Node' object or a 'Node' "\
       "subclass object" unless node.is_a?(Node)
     "/restconf/config/opendaylight-inventory:nodes/node/#{node.name}/yang-ext:mount"
   end
   
-  def to_hash
+ 
+  def to_hash #:nodoc:
     {:ip_addr => @ip, :port_num => @port, :admin_name => @username,
       :admin_password => @password}
   end

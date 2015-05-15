@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class used to define OpenFlow action to set the TCP Destination port
 class SetTpDstAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +port+:: integer : The destination TCP port to set.
   def initialize(order: nil, port: nil)
     super(order: order)
     raise ArgumentError, "Port (port) required" unless port
     @port = port
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => order, 'set-tp-dst-action' => {:port => @port}}
   end
 end

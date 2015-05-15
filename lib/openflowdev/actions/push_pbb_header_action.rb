@@ -28,13 +28,18 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define an OpenFlow action to add a Provider Backbone Bridge encapsulation
 class PushPBBHeaderAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +eth_type+:: integer : The ethernet type of the packet.
   def initialize(order: 0, eth_type: nil)
     super(order: order)
     @eth_type = eth_type
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'push-pbb-aciton' => {'ethernet-type' => @eth_type}}
   end
 end

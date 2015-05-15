@@ -28,7 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define a Flood-all action.  Floods to all bu the ingress port.
 class FloodAllAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
   def initialize(order: 0)
     super(order: order)
   end

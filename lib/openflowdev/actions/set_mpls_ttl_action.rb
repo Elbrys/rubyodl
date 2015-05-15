@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define an OpenFlow action to set the MPLS Time To Live (TTL)
 class SetMplsTTLAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +mpls_ttl+:: integer : The Time To Live to set in the MPLS header.
   def initialize(order: 0, mpls_ttl: nil)
     super(order: order)
     raise ArgumentError, "MPLS TTL (mpls_ttl) required" unless mpls_ttl
     @mpls_ttl = mpls_ttl
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => order, 'set-mpls-ttl-action' => {'mpls-ttl' => @mpls_ttl}}
   end
 end

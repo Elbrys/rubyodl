@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+# Class that defines an OpenFlow Pop MPLS action ( remove the tunnel encapsulation )
 class PopMplsHeaderAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +eth_type+:: integer : The ethernet type of the packet.
   def initialize(order: 0, eth_type: nil)
     super(order: order)
     raise ArgumentError, 'Ethernet Type (eth_type) required' unless eth_type
     @eth_type = eth_type
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'pop-mpls-action' => {'ethernet-type' => @eth_type}}
   end
 end

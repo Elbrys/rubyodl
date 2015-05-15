@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
-def check_response_for_success(response)
+def check_response_for_success(response) #:nodoc:
   netconf_response = nil
   if response && ((response.body && response.code.to_i < 204) || (response.code.to_i == 204 && !response.body))
     parsed_body = response.body ? JSON.parse(response.body) : nil
@@ -39,7 +39,7 @@ def check_response_for_success(response)
   netconf_response
 end
 
-def handle_error_response(response)
+def handle_error_response(response) #:nodoc:
   if response && response.body.nil? && response.code.to_i < 204
     netconf_response = NetconfResponse.new(NetconfResponseStatus::CTRL_INTERNAL_ERROR)
   elsif response && response.code.to_i > 204

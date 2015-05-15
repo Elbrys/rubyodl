@@ -28,16 +28,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+# A class that defines a Firewall.
 class Firewall
+
+  # Rules : rules defining behavior of firewall.
   attr_reader :rules
   
+# _Parameters_ 
+# * +rules+:: Rules : rules defining behavior of firewall.
   def initialize(rules: nil)
     raise ArgumentError, "Rules (rules) required" unless rules
     raise ArgumentError, "Rules (rules) must be instance of 'Rules'" unless rules.is_a?(Rules)
     @rules = rules
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {'vyatta-security:security' => {'vyatta-security-firewall:firewall' =>
           {:name => [@rules.to_hash]}}}
   end

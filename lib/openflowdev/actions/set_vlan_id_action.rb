@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define OpenFlow action that will set the VLAN identifier in VLAN header
 class SetVlanIdAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +vlan_id+:: integer : The VLAN identifier to set in VLAN header.
   def initialize(order: nil, vlan_id: nil)
     super(order: order)
     raise ArgumentError, "VLAN ID (vlan_id) required" unless vlan_id
     @vlan_id = vlan_id
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'set-vlan-id-action' => {'vlan-id' => @vlan_id}}
   end
 end

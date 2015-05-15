@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class used to define OpenFlow action to set TCP Source Port
 class SetTpSrcAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +port+:: integer : The port number to set for TCP source port.
   def initialize(order: nil, port: nil)
     super(order: order)
     raise ArgumentError, "Port (port) required" unless port
     @port = port
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => order, 'set-tp-src-action' => {:port => @port}}
   end
 end

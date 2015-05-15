@@ -28,14 +28,84 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+# Class for creating and interacting with OpenFlow flows
 class FlowEntry
   require 'openflowdev/instruction'
   require 'openflowdev/match'
   
-  attr_reader :table_id, :id, :priority, :idle_timeout, :hard_timeout, :strict,
-    :install_hw, :barrier, :cookie, :cookie_mask, :name, :instructions, :match,
-    :out_port, :out_group, :flags, :buffer_id
-  
+  # string: ID of the table to put the flow in
+  attr_reader :table_id
+  # integer: Unique identifier of this FlowEntry in the Controller's data store
+  attr_reader :id
+  # integer: Priority level of flow entry
+  attr_reader :priority
+  # integer: Idle time before discarding (seconds)
+  attr_reader :idle_timeout
+  # integer: Max time before discarding (seconds)
+  attr_reader :hard_timeout
+  # boolean: Modify/Delete entry strictly matching wildcards and priority
+  attr_reader :strict
+  # internal Controller's inventory attribute
+  attr_reader :install_hw
+  # boolean: Boolean flag used to enforce OpenFlow switch to do ordered message processing.
+  # Barrier request/reply messages are used by the controller to ensure message dependencies
+  # have been met or to receive notifications for completed operations. When the controller
+  # wants to ensure message dependencies have been met or wants to receive notifications for
+  # completed operations, it may use an OFPT_BARRIER_REQUEST message. This message has no body.
+  # Upon receipt, the switch must finish processing all previously-received messages, including
+  # sending corresponding reply or error messages, before executing any messages beyond the
+  # Barrier Request.
+  attr_reader :barrier
+  # integer: Opaque Controller-issued identifier
+  attr_reader :cookie
+  # integer: Mask used to restrict the cookie bits that must match when the command is
+  # OFPFC_MODIFY* or OFPFC_DELETE*. A value of 0 indicates no restriction
+  attr_reader :cookie_mask
+  # string: FlowEntry name in the FlowTable (internal Controller's inventory attribute)
+  attr_reader :name
+  # list of Instruction: Instructions to be executed when a flow matches this entry flow match fields
+  attr_reader :instructions
+  # Match: Flow match fields
+  attr_reader :match
+  # integer: For delete commands, require matching entries to include this as an
+  # output port. A value of OFPP_ANY indicates no restriction.
+  attr_reader :out_port
+  # integer: For delete commands, require matching entries to include this as an
+  # output group. A value of OFPG_ANY indicates no restriction
+  attr_reader :out_group
+  # integer: Bitmap of OpenFlow flags (OFPFF_* from OpenFlow spec)
+  attr_reader :flags
+  # Buffered packet to apply to, or OFP_NO_BUFFER. Not meaningful for delete
+  attr_reader :buffer_id
+
+  # _Parameters_ 
+  # * +flow_table_id+:: string: ID of the table to put the flow in
+  # * +flow_id+:: integer: Unique identifier of this FlowEntry in the Controller's data store
+  # * +flow_priority+:: integer: Priority level of flow entry
+  # * +name+:: string: FlowEntry name in the FlowTable (internal Controller's inventory attribute)
+  # * +idle_timeout+:: integer: Idle time before discarding (seconds)
+  # * +hard_timeout+:: integer: Max time before discarding (seconds)
+  # * +strict+:: boolean: Modify/Delete entry strictly matching wildcards and priority
+  # * +install_hw+:: internal Controller's inventory attribute
+  # * +barrier+:: boolean: Boolean flag used to enforce OpenFlow switch to do ordered message processing.
+  # Barrier request/reply messages are used by the controller to ensure message dependencies
+  # have been met or to receive notifications for completed operations. When the controller
+  # wants to ensure message dependencies have been met or wants to receive notifications for
+  # completed operations, it may use an OFPT_BARRIER_REQUEST message. This message has no body.
+  # Upon receipt, the switch must finish processing all previously-received messages, including
+  # sending corresponding reply or error messages, before executing any messages beyond the
+  # Barrier Request.
+  # * +cookie+:: integer: Opaque Controller-issued identifier
+  # * +cookie_mask+:: integer: Mask used to restrict the cookie bits that must match when the command is
+  # OFPFC_MODIFY* or OFPFC_DELETE*. A value of 0 indicates no restriction
+  # * +out_port+:: integer: For delete commands, require matching entries to include this as an
+  # output port. A value of OFPP_ANY indicates no restriction.
+  # * +out_group+:: integer: For delete commands, require matching entries to include this as an
+  # output group. A value of OFPG_ANY indicates no restriction
+  # * +flags+:: integer: Bitmap of OpenFlow flags (OFPFF_* from OpenFlow spec)
+  # * +buffer_id+:: Buffered packet to apply to, or OFP_NO_BUFFER. Not meaningful for delete
+
+
   def initialize(flow_table_id: 0, flow_id: nil, flow_priority: nil, name: nil,
       idle_timeout: 0, hard_timeout: 0, strict: false, install_hw: false,
       barrier: false, cookie: nil, cookie_mask: nil, out_port: nil,
@@ -61,17 +131,27 @@ class FlowEntry
     @buffer_id = buffer_id
   end
   
+  ##
+  # Add an Instruction to the flow entry.
+  #
+  # _Parameters_ 
+  # * +instruction+:: Instruction : Instruction to add to the flow entry. 
   def add_instruction(instruction)
     raise ArgumentError, "Instruction must be of type 'Instruction'" unless instruction.is_a?(Instruction)
     @instructions << instruction
   end
-  
+
+  ##
+  # Add a match rule to the flow entry.
+  #
+  # _Parameters_ 
+  # * +match+:: Match : Match to add to the flow entry. 
   def add_match(match)
     raise ArgumentError, "Match must be of type 'Match'" unless match.is_a?(Match)
     @match = match
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     instructions_hash = []
     @instructions.each do |instruction|
       instructions_hash << instruction.to_hash

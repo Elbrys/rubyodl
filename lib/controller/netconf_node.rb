@@ -29,9 +29,33 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'controller/node'
+
+##
+# Class that represents a NetconfNode
+#
 class NetconfNode < Node
-  attr_reader :ip, :port, :username, :password, :tcp_only
-  
+
+
+  # String : IP address for NETCONF protocol of NETCONF device.  e.g. 172.22.11.44 
+  attr_reader :ip
+  # String : Port number of the NETCONF protocol.   e.g. 830
+  attr_reader :port
+  # String : Admin userid for logon to NETCONF device.  e.g. vyatta
+  attr_reader :username
+  # String : Admin password for logon NETCONF device.  e.g. vyatta
+  attr_reader :password
+  # Boolean : True if only TCP is used to communicate with NETCONF device.
+  attr_reader :tcp_only
+
+  # _Parameters_ 
+# * +controller+:: Controller : The controller object through which NETCONF device is to be accessed.
+# * +name+:: String : The name of the NETCONF node.  e.g. vrouter
+# * +ip_addr+:: String : IP address for NETCONF protocol of NETCONF device.  e.g. 172.22.11.44 
+# * +port_number+:: String : Port number of the NETCONF protocol.   e.g. 830
+# * +admin_name+:: String : Admin userid for logon to NETCONF device.  e.g. vyatta
+# * +admin_password+:: String : Admin password for logon NETCONF device.  e.g. vyatta
+# * +tcp_only+:: Boolean : True if only TCP is used to communicate with NETCONF device.
+#
   def initialize(controller: nil, name: nil, ip_addr: nil,
       port_number: nil, admin_name: nil, admin_password: nil,
       tcp_only: false)
@@ -48,7 +72,7 @@ class NetconfNode < Node
     @tcp_only = tcp_only
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:controller => @controller.to_hash, :name => @name, :ip_addr => @ip,
       :port_num => @port, :admin_name => @username, :admin_password => @password}
   end

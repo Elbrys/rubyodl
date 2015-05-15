@@ -28,12 +28,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+# Class to represent OpenFlow action for forwarding to the loopback interface of device
 class LoopbackAction
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
   def initialize(order: 0)
     super(order: order)
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'loopback_action' => {}}
   end
 end

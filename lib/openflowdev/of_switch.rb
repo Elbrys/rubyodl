@@ -29,19 +29,33 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'controller/openflow_node'
+
+# Class that represents an instance of 'OpenFlow Switch' (OpenFlow capable device).
 class OFSwitch < OpenflowNode
   require 'json'
   require 'controller/controller'
   require 'openflowdev/flow_entry'
   require 'openflowdev/action_output'
   
+  # String: name of the controller node.
   attr_reader :name
   
+# _Parameters_ 
+# * +controller+:: Controller : Controller object through which the OpenFlow switch is to be controlled.
+# * +name+:: String : Node name of the OpenFlow node.
+# * +dpid+:: String : The OpenFlow datapath identifier for the OpenFlow device I.  e.g. admin
+
   def initialize(controller: nil, name: nil, dpid: nil)
     super(controller: controller, name: name)
     @dpid = dpid
   end
-  
+
+
+  ##
+  # Return info about the OpenFlow switch.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and info about the OpenFlow switch.  
   def get_switch_info
     get_uri = @controller.get_node_operational_uri(self)
     response = @controller.rest_agent.get_request(get_uri)
@@ -71,6 +85,11 @@ class OFSwitch < OpenflowNode
     end
   end
   
+  ##
+  # Return a list of OpenFlow features supported by the OpenFlow switch.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and supported features.
   def get_features_info
     get_uri = @controller.get_node_operational_uri(self)
     response = @controller.rest_agent.get_request(get_uri)
@@ -92,6 +111,11 @@ class OFSwitch < OpenflowNode
     end
   end
   
+  ##
+  # Return a list of ports for the OpenFlow switch.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of ports.
   def get_ports_list
     get_uri = @controller.get_node_operational_uri(self)
     response = @controller.rest_agent.get_request(get_uri)
@@ -109,6 +133,11 @@ class OFSwitch < OpenflowNode
     end
   end
   
+  ##
+  # Return a brief set of information about each port on the OpenFlow switch.
+  #
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of ports with brief info for each.
   def get_ports_brief_info
     get_uri = @controller.get_node_operational_uri(self)
     response = @controller.rest_agent.get_request(get_uri)
@@ -131,6 +160,13 @@ class OFSwitch < OpenflowNode
     end
   end
   
+  ##
+  # Return detailed information about a specific port.
+  #
+  # _Parameters_ 
+  # * +port+:: Integer : number for the port from the #get_ports_brief_info 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and detailed information about the requested port.
   def get_port_detail_info(port)
     get_uri = "#{@controller.get_node_operational_uri(self)}/node-connector/"\
       "#{self.name}:#{port}"
@@ -145,6 +181,13 @@ class OFSwitch < OpenflowNode
     end
   end
   
+  ##
+  # Add a new flow or modify an existing one.
+  #
+  # _Parameters_ 
+  # * +flow+:: FlowEntry : the flow definition 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and error details (if Status indicates an error).
   def add_modify_flow(flow)
     put_uri = "#{@controller.get_node_config_uri(self)}/table/#{flow.table_id}/"\
       "flow/#{flow.id}"
@@ -157,6 +200,14 @@ class OFSwitch < OpenflowNode
     end
   end
   
+  ##
+  # Return details of a specific flow.
+  #
+  # _Parameters_ 
+  # * +table_id+:: String : the identifier for the OpenFlow table from which to retrieve the flow 
+  # * +flow_id+:: String : the identifier for the flow to retrieve.
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and details about the requested flow.
   def get_configured_flow(table_id: nil, flow_id: nil)
     raise ArgumentError, "Table ID (table_id) required" unless table_id
     raise ArgumentError, "Flow ID (flow_id) required" unless flow_id
@@ -168,6 +219,14 @@ class OFSwitch < OpenflowNode
     end
   end
   
+  ##
+  # Remove a flow.
+  #
+  # _Parameters_ 
+  # * +table_id+:: String : the identifier for the OpenFlow table from which to remove the flow 
+  # * +flow_id+:: String : the identifier for the flow to remove.
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and details on error (if Status indicates an error).
   def delete_flow(table_id: nil, flow_id: nil)
     raise ArgumentError, "Table ID (table_id) required" unless table_id
     raise ArgumentError, "Flow ID (flow_id) required" unless flow_id
@@ -181,16 +240,38 @@ class OFSwitch < OpenflowNode
     end
   end
   
+  ##
+  # Return a list of flows in the controller's operational data store for the OpenFlow switch.  These are the flows that are in the switch.
+  #
+  # _Parameters_ 
+  # * +table_id+:: String : the identifier for the OpenFlow table from which to retrieve the flows 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of flows.
   def get_operational_flows(table_id: nil)
     raise ArgumentError, "Table ID (table_id) required" unless table_id
     get_flows(table_id: table_id)
   end
   
+  ##
+  # Return a list of flows in the controller's configuration data store for the OpenFlow switch.  These are the flows that the controller is supposed to program into the OpenFlow switch.
+  #
+  # _Parameters_ 
+  # * +table_id+:: String : the identifier for the OpenFlow table from which to retrieve the flows 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of flows.
   def get_configured_flows(table_id: nil)
     raise ArgumentError, "Table ID (table_id) required" unless table_id
     get_flows(table_id: table_id, is_operational: false)
   end
   
+  ##
+  # Return a list of flows in the controller's operational data store for the OpenFlow switch.  These are the flows that are in the switch.
+  # These flows will be returned in Open Vswitch (OVS) format.
+  #
+  # _Parameters_ 
+  # * +table_id+:: String : the identifier for the OpenFlow table from which to retrieve the flows 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of flows in Open VSwitch format.
   def get_operational_flows_ovs_syntax(table_id: nil, sort: false)
     raise ArgumentError, "Table ID (table_id) required" unless table_id
     response = get_operational_flows(table_id: table_id)
@@ -206,6 +287,16 @@ class OFSwitch < OpenflowNode
     end
   end
   
+
+  ##
+  # Return a list of flows in the controller's configured data store for the OpenFlow switch.  
+  # These are the flows that the controller is to program into the OpenFlow switch.
+  # These flows will be returned in Open Vswitch (OVS) format.
+  #
+  # _Parameters_ 
+  # * +table_id+:: String : the identifier for the OpenFlow table from which to retrieve the flows 
+  # _Return_ _Value_
+  # * NetconfResponse :  Status ( NetconfResponseStatus ) and list of flows in Open VSwitch format.
   def get_configured_flows_ovs_syntax(table_id: nil, sort: false)
     raise ArgumentError, "Table ID (table_id) required" unless table_id
     response = get_configured_flows(table_id: table_id)
@@ -223,7 +314,7 @@ class OFSwitch < OpenflowNode
   
   private
   
-  def get_flows(table_id: nil, is_operational: true)
+  def get_flows(table_id: nil, is_operational: true) #:nodoc:
     if is_operational
       get_uri = "#{@controller.get_node_operational_uri(self)}/"\
         "flow-node-inventory:table/#{table_id}"
@@ -246,7 +337,7 @@ class OFSwitch < OpenflowNode
     end
   end
   
-  def odl_to_ovs_flow_syntax(odl_flow)
+  def odl_to_ovs_flow_syntax(odl_flow) #:nodoc:
     ovs_flow = {}
     if odl_flow.has_key?('cookie')
       ovs_flow['cookie'] = "0x#{odl_flow['cookie'].to_s(16)}"

@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define OpenFlow action to set the destination IP (network layer) address
 class SetNwDstAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +ip_addr+:: string : The destination IP address to set.
   def initialize(order: nil, ip_addr: nil)
     super(order: order)
     raise ArgumentError, "IP Address (ip_addr) required" unless ip_addr
     @ip = ip_addr
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'set-nw-dst-action' => {:address => @ip}}
   end
 end

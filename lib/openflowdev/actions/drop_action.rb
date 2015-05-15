@@ -30,6 +30,7 @@
 
 require 'openflowdev/actions/action'
 
+#Class defining an OpenFlow action to drop the packet.
 class DropAction < Action
   def to_hash
     {:order => @order, 'drop-action' => {}}

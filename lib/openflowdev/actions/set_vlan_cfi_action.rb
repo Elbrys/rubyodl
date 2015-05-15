@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class used to define OpenFlow action to set the CFI field of VLAN header
 class SetVlanCfiAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +vlan_cfi+:: integer : The CFI field value to set.
   def initialize(order: nil, vlan_cfi: nil)
     super(order: order)
     raise ArgumentError, "VLAN CFI (vlan_cfi) required" unless vlan_cfi
     @vlan_cfi = vlan_cfi
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'set-vlan-cfi-action' => {'vlan-cfi' => @vlan_cfi}}
   end
 end

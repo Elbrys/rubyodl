@@ -28,9 +28,22 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+# The class that defines a Firewall Rule.
 class Rule
-  attr_reader :number, :action, :src_address
-  
+
+  # Integer: The rule number.  e.g. 40
+  attr_reader :number
+  # String: The action for the rule.  e.g. "drop" or "accept"
+  attr_reader :action
+  # String: The source IP address on which the rule will match.  e.g. "172.22.17.107"
+  attr_reader :src_address
+
+# _Parameters_ 
+# * +rule_number+:: Integer: The rule number.  e.g. 40 
+# * +action+:: String: The action for the rule.  e.g. "drop" or "accept"
+# * +source_address+:: String: The source IP address on which the rule will match.  e.g. "172.22.17.107"
+# * +icmp_typename+:: String : [optional] ICMP type.  e.g. "ping"
+
   def initialize(rule_number: nil, action: nil, source_address: nil,
     icmp_typename: nil)
     raise ArgumentError, "Rule number (rule_number) required" unless rule_number
@@ -44,7 +57,7 @@ class Rule
     @protocol = "icmp" if icmp_typename
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     hash = {:action => @action, :source => {:address => @src_address},
       :tagnode => @number, :protocol => @protocol, :icmp =>
         {'type-name' => @icmp_typename}}

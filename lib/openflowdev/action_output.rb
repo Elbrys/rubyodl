@@ -28,22 +28,56 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+# OpenFlow 'Output' action type
 class ActionOutput
-  attr_reader :type, :order, :port, :length
-  
+  # string : type of action.
+  attr_reader :type
+  # integer : order 
+  attr_reader :order
+  # integer : port to output
+  attr_reader :port
+  # integer :  When the ’port’ is the controller, this indicates the max number of 
+  # bytes to send. A value of zero means no bytes of the packet should be sent. 
+  # A value of OFPCML_NO_BUFFER (0xffff) means that the packet is not buffered and the 
+  # complete packet is to be sent to the controller.
+  attr_reader :length
+
+# _Parameters_ 
+# * +port+:: integer : the port to target for output 
+# * +length+:: integer : When the ’port’ is the controller, this indicates the max number of 
+  # bytes to send. A value of zero means no bytes of the packet should be sent. 
+  # A value of OFPCML_NO_BUFFER (0xffff) means that the packet is not buffered and the 
+  # complete packet is to be sent to the controller.
+# * +order+:: integer : order
   def initialize(port: nil, length: nil, order: nil)
     @type = 'output'
     @order = order
     @port = port
     @length = length
   end
-  
+
+
+  ##
+  # Return a list of YANG schemas for the node.
+  #
+  # _Parameters_ 
+  # * +port+:: integer : the port to target for output 
+  # * +length+:: integer : When the ’port’ is the controller, this indicates the max number of 
+  # bytes to send. A value of zero means no bytes of the packet should be sent. 
+  # A value of OFPCML_NO_BUFFER (0xffff) means that the packet is not buffered and the 
+  # complete packet is to be sent to the controller.
+  # * +order+:: integer : order
   def update(port: nil, length: nil, order: nil)
     @order = order unless order.nil?
     @port = port unless port.nil?
     @length = length unless length.nil?
   end
   
+  ##
+  # Update from an existing Action .
+  #
+  # _Parameters_ 
+  # * +action_object+:: Action : Update this action from an existing Action. 
   def update_from_object(action_object)
     @order = action_object['order']
     if action_object.has_key?('output-action')

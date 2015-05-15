@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define an OpenFlow action to set the Ethernet (data layer) source MAC address
 class SetDlSrcAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +mac_addr+:: string : The MAC address to set in source field of ethernet header.
   def initialize(order: nil, mac_addr: nil)
     super(order: order)
     raise ArgumentError, "MAC Address (mac_addr) required"
     @mac = mac_addr
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'set-dl-src-action' => {:address => @mac}}
   end
 end

@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
-class RestAgent
+class RestAgent #:nodoc: all
   require 'uri'
   require 'net/http'
   require 'logger'

@@ -28,9 +28,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+##
+# Class that represents a Controller device.
+#
 class Node
+# String : The name of the  node.  e.g. vrouter
   attr_reader :name
   
+# _Parameters_ 
+# * +controller+:: Controller : The controller object through which node is to be accessed.
+# * +name+:: String : The name of the  node.  e.g. vrouter
   def initialize(controller: nil, name: nil)
     raise ArgumentError, "Controller (controller) required" unless controller
     raise ArgumentError, "Name (name) required" unless name

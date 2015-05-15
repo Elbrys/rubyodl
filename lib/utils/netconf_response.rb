@@ -28,17 +28,25 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class defining response to most requests made in rubybvc.
 class NetconfResponse
   require 'utils/netconf_response_status'
   
+  # integer: success or failure status of request
   attr_accessor :status
+  # <variable>: the response from the request or more information about failure
   attr_accessor :body
   
-  def initialize(netconf_response_status = nil, json_body = nil)
+  def initialize(netconf_response_status = nil, json_body = nil) #:nodoc:
     @status = netconf_response_status
     @body = json_body
   end
   
+  ##
+  # Return a string for the status.
+  #
+  # _Return_ _Value_
+  # * string :  A string describing the status of the response (success or reason for failure).
   def message
     case(@status)
     when NetconfResponseStatus::OK

@@ -28,8 +28,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class used to define OpenFlow action to strip the VLAN header.
 class StripVlanAction < Action
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'strip-vlan-action' => {}}
   end
 end

@@ -28,7 +28,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define OpenFlow action to set the queue for the packet
 class SetQueueAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +queue+:: 
+# * +queue_id+:: integer : ID of the queue onto which the packet is to be queued.
   def initialize(order: nil, queue: nil, queue_id: nil)
     super(order: order)
     raise ArgumentError, "Queue (queue) required" unless queue
@@ -37,7 +43,7 @@ class SetQueueAction < Action
     @queue_id = queue
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'queue-action' => {:queue => @queue,
         'queue-id' => @queue_id}}
   end

@@ -28,7 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+# Class to define OpenFlow action that decrements Time To Live
 class DecNwTTLAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction. 
   def initialize(order: 0)
     super(order: order)
   end

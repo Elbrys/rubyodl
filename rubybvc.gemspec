@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.date        = '2015-04-10'
   s.summary     = "Ruby BVC"
   s.description = "Ruby support library for Brocade Vyatta Controller (BVC) RESTCONF API"
-  s.authors     = ["Elbrys Networks"]
+  s.authors     = ["Sarah Dempsey"]
   s.email       = 'support@elbrys.com'
   s.files       = Dir.glob("lib/**/*")
   s.homepage    = '' # github link

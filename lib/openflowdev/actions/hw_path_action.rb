@@ -29,6 +29,9 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 
 class HwPathAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
   def initialize(order: 0)
     super(order: order)
   end

@@ -28,7 +28,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define an action to forward to a group
 class GroupAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +group+:: 
+# * +group_id+:: integer : Identifier for the target group.
   def initialize(order: nil, group: nil, group_id: nil)
     super(order: order)
     raise ArgumentError, "Group (group) required" unless group
@@ -37,7 +43,7 @@ class GroupAction < Action
     @group_id = group_id
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'group-action' => {:group => @group,
         'group-id' => @group_id}}
   end

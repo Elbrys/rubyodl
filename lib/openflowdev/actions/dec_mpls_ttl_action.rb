@@ -28,7 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+# Class representing OpenFlow action to decrement the MPLS Time To Live value.
 class DecMplsTTLAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction. 
   def initialize(order: 0)
     super(order: order)
   end

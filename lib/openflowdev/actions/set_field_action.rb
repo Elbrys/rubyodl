@@ -28,14 +28,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 
+#Class to define OpenFlow action to set a field.
 class SetFieldAction < Action
+
+# _Parameters_ 
+# * +order+:: integer : The order of the action relative to other actions in Instruction.
+# * +vlan_id+:: integer : VLAN identifier to set.
+# * +mpls_label+:: integer : MPLS label to set.
   def initialize(order: 0, vlan_id: nil, mpls_label: nil)
     super(order: order)
     @vlan_id = vlan_id
     @mpls_label = mpls_label
   end
   
-  def to_hash
+  def to_hash #:nodoc:
     {:order => @order, 'set-field' => {'vlan-match' => {'vlan-id' =>
             {'vlan-id' => @vlan_id, 'vlan-id-present' => !@vlan_id.nil?}},
         'protocol-match-fields' => {'mpls-label' => @mpls_label}}}
