@@ -6,7 +6,7 @@ require 'yaml'
 delay = 5
 
 puts "Loading configuration..."
-config = YAML.load_file('sample_openflow/demos/config.yml')
+config = YAML.load_file('config.yml')
 
 puts "\nStarting Demo 2: Get more detailed information for a particular OpenFlow Node"
 

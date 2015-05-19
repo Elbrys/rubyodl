@@ -4,7 +4,7 @@ require 'rubybvc'
 require 'yaml'
 
 puts "Loading configuration..."
-config = YAML.load_file('sample_netconf/commands/config.yml')
+config = YAML.load_file('config.yml')
 
 controller = Controller.new(ip_addr: config['controller']['ip_addr'],
   admin_name: config['controller']['username'],

@@ -6,7 +6,7 @@ require 'yaml'
 delay = 5
 
 puts "Loading configuration..."
-config = YAML.load_file('sample_openflow/demos/config.yml')
+config = YAML.load_file('config.yml')
 
 puts "\nStarting Demo 13: Setting OpenFlow flow on the Controller: "\
   "send to physical port traffic with particular ethernet source and "\

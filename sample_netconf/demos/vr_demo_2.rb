@@ -6,7 +6,7 @@ require 'yaml'
 delay = 5
 
 puts "Loading configuration..."
-config = YAML.load_file('sample_netconf/demos/config_4.yml')
+config = YAML.load_file('config_4.yml')
 
 puts "\nStarting Demo 2: Get definition of specific model of vRouter connected "\
   "to Controller"

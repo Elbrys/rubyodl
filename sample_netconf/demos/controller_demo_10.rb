@@ -6,7 +6,7 @@ require 'yaml'
 delay = 5
 
 puts "Loading configuration..."
-config = YAML.load_file('sample_netconf/demos/config_2.yml')
+config = YAML.load_file('config_2.yml')
 
 puts "\nStarting Demo 10: Add / Delete Node"
 

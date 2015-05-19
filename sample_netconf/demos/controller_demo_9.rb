@@ -6,7 +6,7 @@ require 'yaml'
 delay = 5
 
 puts "Loading configuration..."
-config = YAML.load_file('sample_netconf/demos/config_1.yml')
+config = YAML.load_file('config_1.yml')
 
 puts "\nStarting Demo 9: Show notification event streams registered on the Controller"
 
