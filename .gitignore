@@ -3,3 +3,5 @@
 /coverage/
 *.gem
 doc
+/sample_openflow/demos/rubybvc-requests.log
+

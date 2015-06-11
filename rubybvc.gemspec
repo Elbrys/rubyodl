@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Sarah Dempsey"]
   s.email       = 'support@elbrys.com'
   s.files       = Dir.glob("lib/**/*")
-  s.homepage    = '' # github link
+  s.homepage    = 'https://github.com/Elbrys/rubyodl'
   s.license     = 'BSD'
   s.add_runtime_dependency "nokogiri", ["= 1.6.6.2"]
 end
